@@ -51,7 +51,9 @@ const BlogPost = mongoose.model("BlogPost", postSchema);
 // Announcement Schema
 const announcementSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  content: { type: String, required: true }
+  content: { type: String, required: true },
+  image: { type: String },
+  link: { type: String }
 }, { timestamps: true });
 
 announcementSchema.index({ createdAt: -1 });
@@ -130,6 +132,51 @@ app.get("/api/user", authenticateToken, async (req, res) => {
   }
 });
 
+// Get all users (admin only)
+app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    const formattedUsers = users.map(user => ({
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      isAdmin: user.isAdmin,
+      createdAt: user.createdAt
+    }));
+    res.json(formattedUsers);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update user role (admin only)
+app.put("/api/users/:id/role", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { isAdmin } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    // Prevent admin from removing their own admin role
+    if (user._id.toString() === req.user.id && !isAdmin) {
+      return res.status(400).json({ message: "Cannot remove your own admin role" });
+    }
+    
+    user.isAdmin = isAdmin;
+    await user.save();
+    
+    res.json({
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      bio: user.bio,
+      isAdmin: user.isAdmin
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Admin middleware
 const requireAdmin = (req, res, next) => {
   if (!req.user.isAdmin) {
@@ -146,6 +193,8 @@ app.get("/api/announcements", async (req, res) => {
       id: ann._id.toString(),
       title: ann.title,
       content: ann.content,
+      image: ann.image,
+      link: ann.link,
       createdAt: ann.createdAt,
       updatedAt: ann.updatedAt
     }));
@@ -157,13 +206,15 @@ app.get("/api/announcements", async (req, res) => {
 
 app.post("/api/announcements", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, content } = req.body;
-    const announcement = new Announcement({ title, content });
+    const { title, content, image, link } = req.body;
+    const announcement = new Announcement({ title, content, image, link });
     await announcement.save();
     res.json({
       id: announcement._id.toString(),
       title: announcement.title,
       content: announcement.content,
+      image: announcement.image,
+      link: announcement.link,
       createdAt: announcement.createdAt,
       updatedAt: announcement.updatedAt
     });
@@ -174,18 +225,22 @@ app.post("/api/announcements", authenticateToken, requireAdmin, async (req, res)
 
 app.put("/api/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, image, link } = req.body;
     const announcement = await Announcement.findById(req.params.id);
     if (!announcement) return res.status(404).json({ message: "Announcement not found" });
     
     announcement.title = title || announcement.title;
     announcement.content = content || announcement.content;
+    announcement.image = image !== undefined ? image : announcement.image;
+    announcement.link = link !== undefined ? link : announcement.link;
     await announcement.save();
     
     res.json({
       id: announcement._id.toString(),
       title: announcement.title,
       content: announcement.content,
+      image: announcement.image,
+      link: announcement.link,
       createdAt: announcement.createdAt,
       updatedAt: announcement.updatedAt
     });
