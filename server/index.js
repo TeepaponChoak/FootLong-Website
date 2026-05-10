@@ -72,6 +72,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Admin middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+};
+
 // Auth Routes
 app.post("/api/register", async (req, res) => {
   try {
@@ -176,14 +184,6 @@ app.put("/api/users/:id/role", authenticateToken, requireAdmin, async (req, res)
     res.status(500).json({ message: "Server error" });
   }
 });
-
-// Admin middleware
-const requireAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ message: "Admin access required" });
-  }
-  next();
-};
 
 // Announcement Routes
 app.get("/api/announcements", async (req, res) => {
