@@ -147,7 +147,20 @@ app.delete("/api/user", authenticateToken, async (req, res) => {
 app.get("/api/posts", async (req, res) => {
   try {
     const posts = await BlogPost.find().sort({ createdAt: -1 });
-    res.json(posts);
+    // Map _id to id for frontend compatibility
+    const formattedPosts = posts.map(post => ({
+      id: post._id.toString(),
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      authorId: post.authorId.toString(),
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      tags: post.tags,
+      images: post.images,
+      videoUrl: post.videoUrl
+    }));
+    res.json(formattedPosts);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -157,7 +170,19 @@ app.get("/api/posts/:id", async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
-    res.json(post);
+    // Map _id to id for frontend compatibility
+    res.json({
+      id: post._id.toString(),
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      authorId: post.authorId.toString(),
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      tags: post.tags,
+      images: post.images,
+      videoUrl: post.videoUrl
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -179,7 +204,19 @@ app.post("/api/posts", authenticateToken, async (req, res) => {
     });
 
     await post.save();
-    res.json(post);
+    // Map _id to id for frontend compatibility
+    res.json({
+      id: post._id.toString(),
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      authorId: post.authorId.toString(),
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      tags: post.tags,
+      images: post.images,
+      videoUrl: post.videoUrl
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -200,7 +237,19 @@ app.put("/api/posts/:id", authenticateToken, async (req, res) => {
     post.videoUrl = videoUrl || post.videoUrl;
 
     await post.save();
-    res.json(post);
+    // Map _id to id for frontend compatibility
+    res.json({
+      id: post._id.toString(),
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      authorId: post.authorId.toString(),
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+      tags: post.tags,
+      images: post.images,
+      videoUrl: post.videoUrl
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
