@@ -27,7 +27,8 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  bio: { type: String, default: "" }
+  bio: { type: String, default: "" },
+  isAdmin: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
@@ -46,6 +47,16 @@ const postSchema = new mongoose.Schema({
 postSchema.index({ createdAt: -1 });
 
 const BlogPost = mongoose.model("BlogPost", postSchema);
+
+// Announcement Schema
+const announcementSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true }
+}, { timestamps: true });
+
+announcementSchema.index({ createdAt: -1 });
+
+const Announcement = mongoose.model("Announcement", announcementSchema);
 
 // Auth Middleware
 const authenticateToken = (req, res, next) => {
@@ -73,11 +84,11 @@ app.post("/api/register", async (req, res) => {
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    const token = jwt.sign({ id: user._id, username: user.username, email: user.email }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET);
 
     res.json({
       token,
-      user: { id: user._id, username: user.username, email: user.email, bio: user.bio }
+      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin }
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -98,11 +109,11 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username, email: user.email }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET);
 
     res.json({
       token,
-      user: { id: user._id, username: user.username, email: user.email, bio: user.bio }
+      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin }
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -114,6 +125,81 @@ app.get("/api/user", authenticateToken, async (req, res) => {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+};
+
+// Announcement Routes
+app.get("/api/announcements", async (req, res) => {
+  try {
+    const announcements = await Announcement.find().sort({ createdAt: -1 });
+    const formattedAnnouncements = announcements.map(ann => ({
+      id: ann._id.toString(),
+      title: ann.title,
+      content: ann.content,
+      createdAt: ann.createdAt,
+      updatedAt: ann.updatedAt
+    }));
+    res.json(formattedAnnouncements);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/api/announcements", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const announcement = new Announcement({ title, content });
+    await announcement.save();
+    res.json({
+      id: announcement._id.toString(),
+      title: announcement.title,
+      content: announcement.content,
+      createdAt: announcement.createdAt,
+      updatedAt: announcement.updatedAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.put("/api/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) return res.status(404).json({ message: "Announcement not found" });
+    
+    announcement.title = title || announcement.title;
+    announcement.content = content || announcement.content;
+    await announcement.save();
+    
+    res.json({
+      id: announcement._id.toString(),
+      title: announcement.title,
+      content: announcement.content,
+      createdAt: announcement.createdAt,
+      updatedAt: announcement.updatedAt
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.delete("/api/announcements/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) return res.status(404).json({ message: "Announcement not found" });
+    await announcement.deleteOne();
+    res.json({ message: "Announcement deleted" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

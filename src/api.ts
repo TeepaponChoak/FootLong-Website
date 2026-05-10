@@ -87,3 +87,25 @@ export const blogAPI = {
       method: "DELETE",
     }),
 };
+
+// Announcement API
+export const announcementAPI = {
+  getAnnouncements: () => apiRequest("/api/announcements"),
+
+  createAnnouncement: (announcement: { title: string; content: string }) =>
+    apiRequest("/api/announcements", {
+      method: "POST",
+      body: JSON.stringify(announcement),
+    }),
+
+  updateAnnouncement: (id: string, updates: { title?: string; content?: string }) =>
+    apiRequest(`/api/announcements/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    }),
+
+  deleteAnnouncement: (id: string) =>
+    apiRequest(`/api/announcements/${id}`, {
+      method: "DELETE",
+    }),
+};

@@ -42,6 +42,17 @@ cd server
 npm install
 ```
 
+### Seed Admin User
+
+Create the admin account (username: FootLong, password: footlong.29):
+
+```bash
+cd server
+npm run seed:admin
+```
+
+This creates a user with admin privileges who can create and manage announcements on the homepage.
+
 ### Test Locally
 
 ```bash
@@ -151,6 +162,37 @@ VITE_API_URL=https://your-backend.onrender.com
 3. Create a blog post
 4. Verify the post appears in the list
 5. Try logging out and back in
+
+## Admin Features
+
+### Setting Up Admin Access
+
+After deployment, run the admin seed script to create the admin account:
+
+```bash
+cd server
+npm run seed:admin
+```
+
+Or manually update a user in MongoDB Atlas to set `isAdmin: true`.
+
+### Admin Credentials
+
+- **Username**: FootLong
+- **Password**: footlong.29
+
+### Admin Capabilities
+
+The admin user can:
+- Create announcements that appear prominently on the homepage
+- Edit existing announcements
+- Delete announcements
+- View announcement history
+
+### Announcement Layout
+
+- **Latest announcement**: Displayed prominently at the top with a special badge
+- **History**: Previous announcements are listed below in a compact format
 
 ## Troubleshooting
 

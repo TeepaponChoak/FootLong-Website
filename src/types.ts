@@ -3,6 +3,7 @@ export interface User {
   username: string;
   email: string;
   bio?: string;
+  isAdmin?: boolean;
 }
 
 export interface BlogPost {
@@ -15,6 +16,14 @@ export interface BlogPost {
   tags: string[];
   images?: string[];
   videoUrl?: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthContextType {

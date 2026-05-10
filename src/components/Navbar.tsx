@@ -8,7 +8,7 @@ export function Navbar() {
   return (
     <nav>
       <div className="nav-content">
-        <Link to="/" className="logo">FOOTLONG_TIPS</Link>
+        <Link to="/" className="logo">FOOTLONG_WEB</Link>
         <div className="nav-links">
           {isAuthenticated ? (
             <>
