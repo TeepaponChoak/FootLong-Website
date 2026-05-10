@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { announcementAPI } from '../api';
 import type { Announcement } from '../types';
-import { Megaphone, Edit2, Trash2, Plus, X, Save } from 'lucide-react';
+import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard } from 'lucide-react';
 
 export function AnnouncementPanel() {
   const { user } = useAuth();
@@ -12,6 +12,8 @@ export function AnnouncementPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [editImage, setEditImage] = useState('');
+  const [editLink, setEditLink] = useState('');
   const [isNew, setIsNew] = useState(false);
 
   const isAdmin = user?.isAdmin;
@@ -37,6 +39,8 @@ export function AnnouncementPanel() {
     setEditingId(null);
     setEditTitle('');
     setEditContent('');
+    setEditImage('');
+    setEditLink('');
     setIsEditing(true);
   };
 
@@ -45,6 +49,8 @@ export function AnnouncementPanel() {
     setEditingId(announcement.id);
     setEditTitle(announcement.title);
     setEditContent(announcement.content);
+    setEditImage(announcement.image || '');
+    setEditLink(announcement.link || '');
     setIsEditing(true);
   };
 
@@ -53,9 +59,19 @@ export function AnnouncementPanel() {
 
     try {
       if (isNew) {
-        await announcementAPI.createAnnouncement({ title: editTitle, content: editContent });
+        await announcementAPI.createAnnouncement({ 
+          title: editTitle, 
+          content: editContent,
+          image: editImage || undefined,
+          link: editLink || undefined
+        });
       } else {
-        await announcementAPI.updateAnnouncement(editingId!, { title: editTitle, content: editContent });
+        await announcementAPI.updateAnnouncement(editingId!, { 
+          title: editTitle, 
+          content: editContent,
+          image: editImage || undefined,
+          link: editLink || undefined
+        });
       }
       setIsEditing(false);
       loadAnnouncements();
@@ -79,6 +95,8 @@ export function AnnouncementPanel() {
     setEditingId(null);
     setEditTitle('');
     setEditContent('');
+    setEditImage('');
+    setEditLink('');
   };
 
   if (loading) {
@@ -97,13 +115,13 @@ export function AnnouncementPanel() {
       {isAdmin && isEditing && (
         <div className="announcement-editor">
           <div className="editor-header">
-            <h3>{isNew ? 'New Announcement' : 'Edit Announcement'}</h3>
+            <h3><Clapperboard size={18} /> {isNew ? 'New Announcement' : 'Edit Announcement'}</h3>
             <button onClick={handleCancel} className="btn-icon">
               <X size={18} />
             </button>
           </div>
           <div className="form-group">
-            <label>Title</label>
+            <label><Clapperboard size={14} /> Title</label>
             <input
               type="text"
               value={editTitle}
@@ -117,7 +135,25 @@ export function AnnouncementPanel() {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               placeholder="Write your announcement..."
-              rows={6}
+              rows={8}
+            />
+          </div>
+          <div className="form-group">
+            <label><ImageIcon size={14} /> Image URL</label>
+            <input
+              type="text"
+              value={editImage}
+              onChange={(e) => setEditImage(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+          <div className="form-group">
+            <label><ExternalLink size={14} /> Link URL</label>
+            <input
+              type="text"
+              value={editLink}
+              onChange={(e) => setEditLink(e.target.value)}
+              placeholder="https://example.com/more-info"
             />
           </div>
           <div className="editor-actions">
@@ -136,28 +172,153 @@ export function AnnouncementPanel() {
       )}
 
       {announcements.length === 0 && !isEditing && (
-        <div className="empty-state" style={{ padding: '2rem', marginTop: '1rem' }}>
-          <Megaphone size={32} style={{ marginBottom: '0.5rem', color: 'var(--color-muted)' }} />
-          <p style={{ color: 'var(--color-muted)' }}>No announcements yet</p>
+        <div className="empty-state" style={{ padding: '3rem', marginTop: '1rem' }}>
+          <Megaphone size={48} style={{ marginBottom: '1rem', color: 'var(--color-muted)' }} />
+          <h3>No announcements yet</h3>
+          <p style={{ color: 'var(--color-muted)' }}>Stay tuned for updates from the production team.</p>
         </div>
       )}
 
       {latestAnnouncement && !isEditing && (
-        <div className="announcement-main">
+        <div className="announcement-layout">
+          {/* History Sidebar - Left Side */}
+          {announcementHistory.length > 0 && (
+            <aside className="announcement-history-sidebar">
+              <h3 className="history-sidebar-title">
+                <Clapperboard size={16} /> Previous Announcements
+              </h3>
+              <div className="history-sidebar-list">
+                {announcementHistory.map((ann) => (
+                  <div key={ann.id} className="history-sidebar-item">
+                    <div className="history-sidebar-item-header">
+                      <h4>{ann.title}</h4>
+                      <span className="history-sidebar-date">
+                        {new Date(ann.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    {isAdmin && (
+                      <div className="history-sidebar-item-actions">
+                        <button onClick={() => handleEdit(ann)} className="btn-icon-small" title="Edit">
+                          <Edit2 size={12} />
+                        </button>
+                        <button onClick={() => handleDelete(ann.id)} className="btn-icon-small btn-icon-delete" title="Delete">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </aside>
+          )}
+
+          {/* Main Announcement - Right Side */}
+          <div className={`announcement-main ${announcementHistory.length > 0 ? '' : 'announcement-main-full'}`}>
+            <article className="announcement-card">
+              <div className="announcement-badge">
+                <Megaphone size={14} /> Latest Announcement
+              </div>
+              
+              {latestAnnouncement.image && (
+                <div className="announcement-image-container">
+                  <img 
+                    src={latestAnnouncement.image} 
+                    alt={latestAnnouncement.title}
+                    className="announcement-image"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
+              <h2 className="announcement-title">{latestAnnouncement.title}</h2>
+              <div className="announcement-content">
+                {latestAnnouncement.content}
+              </div>
+              
+              {latestAnnouncement.link && (
+                <a 
+                  href={latestAnnouncement.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="announcement-link"
+                >
+                  <ExternalLink size={14} /> Learn More
+                </a>
+              )}
+              
+              <div className="announcement-meta">
+                <span className="announcement-date">
+                  {new Date(latestAnnouncement.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+                {isAdmin && (
+                  <div className="announcement-actions">
+                    <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
+                      <Edit2 size={14} />
+                    </button>
+                    <button onClick={() => handleDelete(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </article>
+          </div>
+        </div>
+      )}
+
+      {announcementHistory.length === 0 && latestAnnouncement && !isEditing && (
+        <div className="announcement-main-full">
           <article className="announcement-card">
             <div className="announcement-badge">
               <Megaphone size={14} /> Latest Announcement
             </div>
+            
+            {latestAnnouncement.image && (
+              <div className="announcement-image-container">
+                <img 
+                  src={latestAnnouncement.image} 
+                  alt={latestAnnouncement.title}
+                  className="announcement-image"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            
             <h2 className="announcement-title">{latestAnnouncement.title}</h2>
             <div className="announcement-content">
               {latestAnnouncement.content}
             </div>
+            
+            {latestAnnouncement.link && (
+              <a 
+                href={latestAnnouncement.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="announcement-link"
+              >
+                <ExternalLink size={14} /> Learn More
+              </a>
+            )}
+            
             <div className="announcement-meta">
-              {new Date(latestAnnouncement.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
+              <span className="announcement-date">
+                {new Date(latestAnnouncement.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
               {isAdmin && (
                 <div className="announcement-actions">
                   <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
@@ -170,43 +331,6 @@ export function AnnouncementPanel() {
               )}
             </div>
           </article>
-        </div>
-      )}
-
-      {announcementHistory.length > 0 && !isEditing && (
-        <div className="announcement-history">
-          <h3 className="history-title">
-            <span className="history-line"></span>
-            History
-            <span className="history-line"></span>
-          </h3>
-          <div className="history-list">
-            {announcementHistory.map((ann) => (
-              <div key={ann.id} className="history-item">
-                <div className="history-item-header">
-                  <h4>{ann.title}</h4>
-                  <span className="history-date">
-                    {new Date(ann.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-                <p className="history-content">{ann.content.substring(0, 100)}...</p>
-                {isAdmin && (
-                  <div className="history-item-actions">
-                    <button onClick={() => handleEdit(ann)} className="btn-text">
-                      <Edit2 size={12} /> Edit
-                    </button>
-                    <button onClick={() => handleDelete(ann.id)} className="btn-text btn-text-delete">
-                      <Trash2 size={12} /> Delete
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

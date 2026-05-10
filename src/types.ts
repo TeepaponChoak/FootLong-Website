@@ -22,6 +22,8 @@ export interface Announcement {
   id: string;
   title: string;
   content: string;
+  image?: string;
+  link?: string;
   createdAt: string;
   updatedAt: string;
 }

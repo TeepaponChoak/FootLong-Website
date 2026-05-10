@@ -52,6 +52,17 @@ export const authAPI = {
     }),
 };
 
+// User Management API (Admin only)
+export const userManagementAPI = {
+  getAllUsers: () => apiRequest("/api/users"),
+
+  updateUserRole: (userId: string, isAdmin: boolean) =>
+    apiRequest(`/api/users/${userId}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ isAdmin }),
+    }),
+};
+
 // Blog Post API
 export const blogAPI = {
   getPosts: () => apiRequest("/api/posts"),
@@ -92,13 +103,13 @@ export const blogAPI = {
 export const announcementAPI = {
   getAnnouncements: () => apiRequest("/api/announcements"),
 
-  createAnnouncement: (announcement: { title: string; content: string }) =>
+  createAnnouncement: (announcement: { title: string; content: string; image?: string; link?: string }) =>
     apiRequest("/api/announcements", {
       method: "POST",
       body: JSON.stringify(announcement),
     }),
 
-  updateAnnouncement: (id: string, updates: { title?: string; content?: string }) =>
+  updateAnnouncement: (id: string, updates: { title?: string; content?: string; image?: string; link?: string }) =>
     apiRequest(`/api/announcements/${id}`, {
       method: "PUT",
       body: JSON.stringify(updates),

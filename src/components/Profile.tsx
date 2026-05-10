@@ -3,7 +3,8 @@ import { useAuth } from '../AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { blogAPI } from '../api';
 import type { BlogPost } from '../types';
-import { User, Mail, FileText, Trash2, AlertTriangle, ArrowLeft, Edit } from 'lucide-react';
+import { User, Mail, FileText, Trash2, AlertTriangle, ArrowLeft, Edit, Crown } from 'lucide-react';
+import { UserManagement } from './UserManagement';
 
 export function Profile() {
   const { user, updateProfile, deleteAccount, logout } = useAuth();
@@ -99,7 +100,25 @@ export function Profile() {
             {user.username.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 style={{ marginBottom: '0.25rem' }}>{user.username}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <h1 style={{ marginBottom: 0 }}>{user.username}</h1>
+              {user.isAdmin && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  background: 'rgba(234, 179, 8, 0.15)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  borderRadius: '12px',
+                  padding: '0.15rem 0.5rem',
+                  fontSize: '0.7rem',
+                  color: '#fbbf24',
+                  fontFamily: 'var(--font-mono)'
+                }}>
+                  <Crown size={12} /> Director
+                </span>
+              )}
+            </div>
             <p style={{ color: 'var(--color-muted)', margin: 0 }}>{user.email}</p>
           </div>
         </div>
@@ -114,6 +133,12 @@ export function Profile() {
           <span><strong style={{ color: 'var(--color-text-bright)' }}>{userPosts.length}</strong> posts</span>
         </div>
       </div>
+
+      {user.isAdmin && (
+        <div style={{ marginBottom: '2rem' }}>
+          <UserManagement />
+        </div>
+      )}
 
       {isOwnProfile && (
         <>

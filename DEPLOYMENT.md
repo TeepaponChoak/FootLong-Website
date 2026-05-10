@@ -53,6 +53,8 @@ npm run seed:admin
 
 This creates a user with admin privileges who can create and manage announcements on the homepage.
 
+**Note**: If you encounter MongoDB connection issues (ECONNREFUSED), see [MANUAL_ADMIN_SETUP.md](./MANUAL_ADMIN_SETUP.md) for step-by-step instructions to create the admin user directly in MongoDB Atlas.
+
 ### Test Locally
 
 ```bash
