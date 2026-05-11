@@ -39,6 +39,8 @@ function AppRoutes() {
           } 
         />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/blog" element={<Home />} />
+        <Route path="/search" element={<Home />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

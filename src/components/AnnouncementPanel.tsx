@@ -18,6 +18,7 @@ export function AnnouncementPanel() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [expandedAnnouncement, setExpandedAnnouncement] = useState<string | null>(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
 
   const isAdmin = user?.isAdmin;
 
@@ -107,6 +108,14 @@ export function AnnouncementPanel() {
 
   const toggleExpand = (id: string) => {
     setExpandedAnnouncement(expandedAnnouncement === id ? null : id);
+  };
+
+  const handleViewAnnouncement = (announcement: Announcement) => {
+    setSelectedAnnouncement(announcement);
+  };
+
+  const handleCloseAnnouncementView = () => {
+    setSelectedAnnouncement(null);
   };
 
   const handleCancel = () => {
@@ -281,7 +290,7 @@ export function AnnouncementPanel() {
 
           {/* Main Announcement - Right Side */}
           <div className="announcement-main">
-            <article className="announcement-card">
+            <article className="announcement-card" onClick={() => handleViewAnnouncement(latestAnnouncement)} style={{ cursor: 'pointer' }}>
               <div className="announcement-badge">
                 <Megaphone size={14} /> Latest Announcement
               </div>
@@ -335,6 +344,70 @@ export function AnnouncementPanel() {
                 )}
               </div>
             </article>
+          </div>
+        </div>
+      )}
+
+      {/* ANNOUNCEMENT DETAIL VIEW MODAL */}
+      {selectedAnnouncement && (
+        <div
+          className="modal-overlay"
+          onClick={handleCloseAnnouncementView}
+        >
+          <div
+            className="modal announcement-detail-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close-btn"
+              onClick={handleCloseAnnouncementView}
+            >
+              <X size={24} />
+            </button>
+            
+            <div className="announcement-detail-badge">
+              <Megaphone size={16} /> Announcement
+            </div>
+            
+            {selectedAnnouncement.image && (
+              <div className="announcement-detail-image-container">
+                <img 
+                  src={selectedAnnouncement.image} 
+                  alt={selectedAnnouncement.title}
+                  className="announcement-detail-image"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            
+            <h2 className="announcement-detail-title">{selectedAnnouncement.title}</h2>
+            
+            <div className="announcement-detail-date">
+              {new Date(selectedAnnouncement.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
+            
+            <div className="announcement-detail-content">
+              {selectedAnnouncement.content}
+            </div>
+            
+            {selectedAnnouncement.link && (
+              <a 
+                href={selectedAnnouncement.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="announcement-detail-link"
+              >
+                <ExternalLink size={16} /> Learn More
+              </a>
+            )}
           </div>
         </div>
       )}
