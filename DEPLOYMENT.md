@@ -39,7 +39,7 @@ RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 RESEND_FROM='FootLong Blog <onboarding@resend.dev>'
 ```
 
-> **Note**: See [EMAIL_SETUP.md](./EMAIL_SETUP.md) for step-by-step Resend setup instructions. Resend offers 3,000 free emails/month and has a simple API key setup.
+> **Note**: Without domain verification, Resend can only send to your verified email address. To send to any user, verify a domain at https://resend.com/domains and update `RESEND_FROM` to use your domain.
 
 ### Install Dependencies
 
@@ -59,7 +59,7 @@ npm run seed:admin
 
 This creates a user with admin privileges who can create and manage announcements on the homepage.
 
-**Note**: If you encounter MongoDB connection issues (ECONNREFUSED), see [MANUAL_ADMIN_SETUP.md](./MANUAL_ADMIN_SETUP.md) for step-by-step instructions to create the admin user directly in MongoDB Atlas.
+**Note**: If you encounter MongoDB connection issues, you can create the admin user directly in MongoDB Atlas by connecting to the database and inserting a user document with `isAdmin: true`.
 
 ### Test Locally
 
@@ -242,16 +242,27 @@ Railway offers a simpler deployment process:
 
 ## Email Configuration for Password Reset
 
-The forgot password feature uses **Resend** to send emails. See [EMAIL_SETUP.md](./EMAIL_SETUP.md) for detailed setup instructions.
+The forgot password feature uses **Resend** to send emails.
 
 ### Quick Setup
 
 1. Create a free Resend account at https://resend.com/
 2. Get your API key from the dashboard
-3. Add to your `.env`:
+3. Add to your `server/.env`:
    ```env
    RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    RESEND_FROM='FootLong Blog <onboarding@resend.dev>'
+   ```
+
+### Important: Domain Verification
+
+Without domain verification, Resend can only send emails to your own verified email address (testing mode). To send password reset emails to any user:
+
+1. Go to https://resend.com/domains
+2. Add your domain and follow DNS verification steps
+3. Update `RESEND_FROM` to use your verified domain:
+   ```env
+   RESEND_FROM='FootLong Blog <noreply@yourdomain.com>'
    ```
 
 ### Free Tier
@@ -261,7 +272,7 @@ The forgot password feature uses **Resend** to send emails. See [EMAIL_SETUP.md]
 
 ### Without Email Configuration
 
-If Resend is not configured, the password reset link will be logged to the server console (development mode only). This is useful for testing without setting up email.
+If Resend is not configured, the password reset link will be logged to the server console (development mode only).
 
 ## Support
 
