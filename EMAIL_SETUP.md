@@ -27,17 +27,21 @@ This guide explains how to configure email sending for the forgot password featu
 2. Copy the API key (it starts with `re_`)
    - Example: `re_1234567890abcdefghijklmnopqrstuvwxyz`
 
-### Step 3: Verify a Domain (Required for Production)
+### Step 3: Verify a Domain (Required for Sending to Multiple Recipients)
 
-For development, you can use Resend's default domain. For production, verify your own domain:
+**Important**: Without domain verification, Resend can only send emails to your own verified email address (testing mode). To send password reset emails to any user, you must verify a domain.
 
 1. Go to **Domains** in the left sidebar
 2. Click **Add Domain**
-3. Enter your domain (e.g., `footlongblog.com`)
+3. Enter your domain (e.g., `footlongblog.com` or any domain you own)
 4. Add the DNS records to your domain's DNS settings:
    - MX record
    - TXT records (SPF, DKIM)
 5. Wait for verification (usually a few minutes)
+6. Once verified, update your `server/.env`:
+   ```env
+   RESEND_FROM='FootLong Blog <noreply@yourdomain.com>'
+   ```
 
 ### Step 4: Configure server/.env
 
@@ -71,6 +75,15 @@ npm start
 ---
 
 ## Troubleshooting
+
+### "Can only send testing emails to your own email address" Error
+
+This means you haven't verified a domain yet. Resend in testing mode can only send to your own verified email address.
+
+**Solution**: Verify a domain in Resend:
+1. Go to https://resend.com/domains
+2. Add your domain and follow the DNS verification steps
+3. Update `RESEND_FROM` in `.env` to use your verified domain
 
 ### "Unauthorized" Error
 
