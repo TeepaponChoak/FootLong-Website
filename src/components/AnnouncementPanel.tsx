@@ -128,6 +128,7 @@ export function AnnouncementPanel() {
 
   const latestAnnouncement = announcements.length > 0 ? announcements[0] : null;
   const announcementHistory = announcements.length > 1 ? announcements.slice(1) : [];
+  const hasSidebar = announcementHistory.length > 0;
 
   return (
     <div className="announcement-panel">
@@ -199,7 +200,7 @@ export function AnnouncementPanel() {
       )}
 
       {latestAnnouncement && !isEditing && (
-        <div className="announcement-layout">
+        <div className={`announcement-layout ${hasSidebar ? '' : 'announcement-layout--no-sidebar'}`}>
           {/* History Sidebar - Left Side */}
           {announcementHistory.length > 0 && (
             <aside className="announcement-history-sidebar">
@@ -279,7 +280,7 @@ export function AnnouncementPanel() {
           )}
 
           {/* Main Announcement - Right Side */}
-          <div className={`announcement-main ${announcementHistory.length > 0 ? '' : 'announcement-main-full'}`}>
+          <div className="announcement-main">
             <article className="announcement-card">
               <div className="announcement-badge">
                 <Megaphone size={14} /> Latest Announcement
@@ -335,65 +336,6 @@ export function AnnouncementPanel() {
               </div>
             </article>
           </div>
-        </div>
-      )}
-
-      {announcementHistory.length === 0 && latestAnnouncement && !isEditing && (
-        <div className="announcement-main-full">
-          <article className="announcement-card">
-            <div className="announcement-badge">
-              <Megaphone size={14} /> Latest Announcement
-            </div>
-            
-            {latestAnnouncement.image && (
-              <div className="announcement-image-container">
-                <img 
-                  src={latestAnnouncement.image} 
-                  alt={latestAnnouncement.title}
-                  className="announcement-image"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
-            
-            <h2 className="announcement-title">{latestAnnouncement.title}</h2>
-            <div className="announcement-content">
-              {latestAnnouncement.content}
-            </div>
-            
-            {latestAnnouncement.link && (
-              <a 
-                href={latestAnnouncement.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="announcement-link"
-              >
-                <ExternalLink size={14} /> Learn More
-              </a>
-            )}
-            
-            <div className="announcement-meta">
-              <span className="announcement-date">
-                {new Date(latestAnnouncement.createdAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </span>
-              {isAdmin && (
-              <div className="announcement-actions">
-                    <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
-                      <Edit2 size={14} />
-                    </button>
-                    <button onClick={() => handleDeleteClick(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              )}
-            </div>
-          </article>
         </div>
       )}
 

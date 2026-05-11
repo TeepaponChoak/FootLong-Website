@@ -10,7 +10,6 @@ interface ExtendedUser extends User {
 
 // Role abbreviations mapping - Comprehensive list for all production roles
 const roleAbbreviations: Record<string, string> = {
-  // Direction & Production
   'Director': 'DIR',
   'Assistant Director': 'AD',
   'Second Assistant Director': '2ND AD',
@@ -24,8 +23,6 @@ const roleAbbreviations: Record<string, string> = {
   'Production Coordinator': 'PC',
   'Production Assistant': 'PA',
   'Unit Production Manager': 'UPM',
-  
-  // Camera Department
   'Director of Photography': 'DP',
   'Camera Operator': 'CAM OP',
   'First Assistant Camera': '1ST AC',
@@ -34,29 +31,21 @@ const roleAbbreviations: Record<string, string> = {
   'Steadicam Operator': 'STEADI',
   'Drone Operator': 'DRONE',
   'Still Photographer': 'STILLS',
-  
-  // Lighting & Electrical
   'Gaffer': 'GAF',
   'Best Boy Electric': 'BB ELEC',
   'Lighting Technician': 'LIGHT',
   'Electrician': 'ELEC',
   'Rigging Gaffer': 'RIG GAF',
   'Rigging Electrician': 'RIG ELEC',
-  
-  // Grip Department
   'Key Grip': 'KEY GRIP',
   'Best Boy Grip': 'BB GRIP',
   'Dolly Grip': 'DOLLY',
   'Grip': 'GRIP',
   'Rigging Grip': 'RIG GRIP',
-  
-  // Sound Department
   'Sound Mixer': 'SND',
   'Boom Operator': 'BOOM',
   'Sound Utility': 'SND UT',
   'Playback Operator': 'PLAYBK',
-  
-  // Art Department
   'Production Designer': 'PD',
   'Art Director': 'ART DIR',
   'Set Decorator': 'SET DEC',
@@ -68,8 +57,6 @@ const roleAbbreviations: Record<string, string> = {
   'Graphic Designer': 'GRAPH',
   'Storyboard Artist': 'STORY',
   'Concept Artist': 'CONCEPT',
-  
-  // Costume & Makeup
   'Costume Designer': 'COST',
   'Costume Supervisor': 'COST SV',
   'Wardrobe Assistant': 'WARD',
@@ -78,16 +65,12 @@ const roleAbbreviations: Record<string, string> = {
   'Special Effects Makeup Artist': 'SFX MU',
   'Key Makeup Artist': 'KEY MU',
   'Key Hair Stylist': 'KEY HAIR',
-  
-  // Editing & Post-Production
   'Editor': 'EDT',
   'Assistant Editor': 'ASST EDT',
   'Colorist': 'COLOR',
   'Post-Production Supervisor': 'POST SV',
   'Digital Intermediate Editor': 'DI EDT',
   'Conform Editor': 'CONFORM',
-  
-  // Visual Effects
   'Visual Effects Supervisor': 'VFX SV',
   'Visual Effects Producer': 'VFX PROD',
   'Visual Effects Coordinator': 'VFX CO',
@@ -98,42 +81,88 @@ const roleAbbreviations: Record<string, string> = {
   '3D Animator': '3D ANIM',
   'Texture Artist': 'TEX',
   'Lighting Artist': 'LGHT ART',
-  
-  // Stunts
   'Stunt Coordinator': 'STUNT',
   'Stunt Performer': 'STUNT PF',
   'Stunt Double': 'STUNT DB',
   'Fight Choreographer': 'FIGHT',
-  
-  // Casting
   'Casting Director': 'CAST',
   'Casting Assistant': 'CAST ASST',
-  
-  // Locations
   'Location Manager': 'LOC',
   'Location Scout': 'SCOUT',
   'Location Assistant': 'LOC ASST',
-  
-  // Script & Continuity
   'Script Supervisor': 'SCRIPT',
   'Script Reader': 'READER',
   'Script Editor': 'SCRIPT ED',
-  
-  // Transportation
   'Transportation Coordinator': 'TRANS',
   'Driver': 'DRV',
-  
-  // Catering & Craft
   'Caterer': 'CATER',
   'Craft Service': 'CRAFT',
-  
-  // Safety & Security
   'Safety Supervisor': 'SAFETY',
   'Security Guard': 'SEC',
   'Medic': 'MED',
-  
-  // General
   'Crew Member': 'CREW'
+};
+
+// Role categories for grouping in dropdown
+const roleCategories: Record<string, string[]> = {
+  'Direction & Production': [
+    'Director', 'Assistant Director', 'Second Assistant Director', 'Third Assistant Director',
+    'Producer', 'Executive Producer', 'Line Producer', 'Associate Producer', 'Co-Producer',
+    'Production Manager', 'Production Coordinator', 'Production Assistant', 'Unit Production Manager'
+  ],
+  'Camera Department': [
+    'Director of Photography', 'Camera Operator', 'First Assistant Camera', 'Second Assistant Camera',
+    'Camera Loader', 'Steadicam Operator', 'Drone Operator', 'Still Photographer'
+  ],
+  'Lighting & Electrical': [
+    'Gaffer', 'Best Boy Electric', 'Lighting Technician', 'Electrician', 'Rigging Gaffer', 'Rigging Electrician'
+  ],
+  'Grip Department': [
+    'Key Grip', 'Best Boy Grip', 'Dolly Grip', 'Grip', 'Rigging Grip'
+  ],
+  'Sound Department': [
+    'Sound Mixer', 'Boom Operator', 'Sound Utility', 'Playback Operator'
+  ],
+  'Art Department': [
+    'Production Designer', 'Art Director', 'Set Decorator', 'Props Master', 'Props Assistant',
+    'Leadman', 'Swing Gang', 'Set Dresser', 'Graphic Designer', 'Storyboard Artist', 'Concept Artist'
+  ],
+  'Costume & Makeup': [
+    'Costume Designer', 'Costume Supervisor', 'Wardrobe Assistant', 'Makeup Artist',
+    'Hair Stylist', 'Special Effects Makeup Artist', 'Key Makeup Artist', 'Key Hair Stylist'
+  ],
+  'Editing & Post-Production': [
+    'Editor', 'Assistant Editor', 'Colorist', 'Post-Production Supervisor',
+    'Digital Intermediate Editor', 'Conform Editor'
+  ],
+  'Visual Effects': [
+    'Visual Effects Supervisor', 'Visual Effects Producer', 'Visual Effects Coordinator',
+    'Compositor', 'Roto Artist', 'Matchmove Artist', 'CG Supervisor', '3D Animator', 'Texture Artist', 'Lighting Artist'
+  ],
+  'Stunts': [
+    'Stunt Coordinator', 'Stunt Performer', 'Stunt Double', 'Fight Choreographer'
+  ],
+  'Casting': [
+    'Casting Director', 'Casting Assistant'
+  ],
+  'Locations': [
+    'Location Manager', 'Location Scout', 'Location Assistant'
+  ],
+  'Script & Continuity': [
+    'Script Supervisor', 'Script Reader', 'Script Editor'
+  ],
+  'Transportation': [
+    'Transportation Coordinator', 'Driver'
+  ],
+  'Catering & Craft': [
+    'Caterer', 'Craft Service'
+  ],
+  'Safety & Security': [
+    'Safety Supervisor', 'Security Guard', 'Medic'
+  ],
+  'General': [
+    'Crew Member'
+  ]
 };
 
 function getRoleAbbreviation(role: string): string {
@@ -325,16 +354,25 @@ export function UserManagement() {
                     
                     {openDropdown === user.id && unassignedRoles.length > 0 && (
                       <div className="custom-dropdown-menu">
-                        {unassignedRoles.map((role) => (
-                          <button
-                            key={role}
-                            className="dropdown-item"
-                            onClick={() => addRole(user.id, userRoles, role)}
-                          >
-                            <span className="dropdown-item-full">{role}</span>
-                            <span className="dropdown-item-abbr">{getRoleAbbreviation(role)}</span>
-                          </button>
-                        ))}
+                        {Object.entries(roleCategories).map(([category, roles]) => {
+                          const availableInCategory = roles.filter(r => unassignedRoles.includes(r));
+                          if (availableInCategory.length === 0) return null;
+                          return (
+                            <div key={category} className="dropdown-category">
+                              <div className="dropdown-category-header">{category}</div>
+                              {availableInCategory.map((role) => (
+                                <button
+                                  key={role}
+                                  className="dropdown-item"
+                                  onClick={() => addRole(user.id, userRoles, role)}
+                                >
+                                  <span className="dropdown-item-full">{role}</span>
+                                  <span className="dropdown-item-abbr">{getRoleAbbreviation(role)}</span>
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

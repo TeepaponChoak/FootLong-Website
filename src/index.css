@@ -585,6 +585,15 @@ button:disabled {
   margin-top: 1.5rem;
 }
 
+.announcement-layout--no-sidebar {
+  display: block;
+}
+
+.announcement-layout--no-sidebar .announcement-main {
+  width: 100%;
+  max-width: 100%;
+}
+
 /* History Sidebar */
 .announcement-history-sidebar {
   background: rgba(22, 22, 42, 0.6);
@@ -1132,6 +1141,25 @@ button:disabled {
 .dropdown-item:hover {
   background: rgba(168, 85, 247, 0.15);
   color: var(--color-accent);
+}
+
+.dropdown-category {
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-category:last-child {
+  margin-bottom: 0;
+}
+
+.dropdown-category-header {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.15);
+  margin-bottom: 0.25rem;
 }
 
 .dropdown-item-full {
