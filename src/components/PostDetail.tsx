@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { blogAPI } from '../api';
 import type { BlogPost } from '../types';
-import { ArrowLeft, Calendar, User, Trash2, AlertTriangle, Star, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Trash2, AlertTriangle, Star, Users, ZoomIn, Eye } from 'lucide-react';
+import { ImageLightbox } from './ImageLightbox';
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,8 @@ export function PostDetail() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -41,6 +44,15 @@ export function PostDetail() {
     } catch (error) {
       console.error('Failed to delete post:', error);
     }
+  };
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
   };
 
   // Convert URLs into highlighted clickable links
@@ -261,28 +273,165 @@ export function PostDetail() {
         {post.images && post.images.length > 0 && (
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns:
-                'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '0.5rem',
               marginTop: '2rem',
-              width: '100%',
             }}
           >
-            {post.images.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt={`${post.title} ${index + 1}`}
-                style={{
-                  width: '100%',
-                  maxHeight: '300px',
-                  objectFit: 'cover',
-                  borderRadius: '8px',
-                }}
-              />
-            ))}
+            <h3
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.9rem',
+                color: 'var(--color-accent)',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              <Eye size={16} />
+              Images ({post.images.length})
+            </h3>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns:
+                  post.images.length === 1
+                    ? '1fr'
+                    : post.images.length === 2
+                    ? 'repeat(2, 1fr)'
+                    : 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '0.75rem',
+                width: '100%',
+              }}
+            >
+              {post.images.map((img, index) => (
+                <div
+                  key={index}
+                  style={{
+                    position: 'relative',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: '8px',
+                      border: '1px solid var(--color-border)',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                    }}
+                    onClick={() => openLightbox(index)}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-accent)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(168, 85, 247, 0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <img
+                      src={img}
+                      alt={`${post.title} ${index + 1}`}
+                      style={{
+                        width: '100%',
+                        height: (post.images?.length ?? 0) === 1 ? 'auto' : '250px',
+                        objectFit: (post.images?.length ?? 0) === 1 ? 'contain' : 'cover',
+                        borderRadius: '8px',
+                        display: 'block',
+                        transition: 'transform 0.3s ease',
+                      }}
+                    />
+
+                    {/* Hover Overlay */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0, 0, 0, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        borderRadius: '8px',
+                      }}
+                    />
+
+                    {/* Zoom Icon on Hover */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        background: 'rgba(168, 85, 247, 0.9)',
+                        borderRadius: '50%',
+                        width: '48px',
+                        height: '48px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease, transform 0.3s ease',
+                        zIndex: 1,
+                      }}
+                    >
+                      <ZoomIn size={22} color="white" />
+                    </div>
+
+                    {/* Image Counter Badge */}
+                    {(post.images?.length ?? 0) > 1 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          left: '8px',
+                          background: 'rgba(0, 0, 0, 0.7)',
+                          color: 'var(--color-text)',
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.7rem',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '4px',
+                          zIndex: 1,
+                        }}
+                      >
+                        {index + 1} / {post.images?.length}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Hint Text */}
+            <p
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.7rem',
+                color: 'var(--color-muted)',
+                marginTop: '0.75rem',
+                textAlign: 'center',
+              }}
+            >
+              Click on an image to inspect • Use arrow keys to navigate • Scroll to zoom
+            </p>
           </div>
+        )}
+
+        {/* Image Lightbox */}
+        {post.images && post.images.length > 0 && (
+          <ImageLightbox
+            images={post.images}
+            initialIndex={lightboxIndex}
+            isOpen={lightboxOpen}
+            onClose={closeLightbox}
+          />
         )}
 
         {/* DELETE BUTTON */}
