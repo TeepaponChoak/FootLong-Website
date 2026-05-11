@@ -4,7 +4,7 @@ import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -431,22 +431,12 @@ app.delete("/api/user", authenticateToken, async (req, res) => {
   }
 });
 
-// Email transporter setup
-const createTransporter = () => {
-  // Check if SMTP credentials are configured
-  if (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT),
-      secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-  }
-  return null;
-};
+// Resend setup
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+if (resend) {
+  console.log('Resend email service initialized');
+}
 
 // Forgot Password Route
 app.post("/api/forgot-password", async (req, res) => {
@@ -475,155 +465,153 @@ app.post("/api/forgot-password", async (req, res) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
     const resetLink = `${clientUrl}/reset-password/${resetToken}`;
 
-    // Try to send email if SMTP is configured
-    const transporter = createTransporter();
-    if (transporter) {
+    // Try to send email using Resend
+    if (resend) {
       try {
-        await transporter.sendMail({
-          from: `"${process.env.EMAIL_FROM_NAME || 'FootLong Blog'}" <${process.env.EMAIL_FROM || 'noreply@footlongblog.com'}>`,
+        await resend.emails.send({
+          from: process.env.RESEND_FROM || 'onboarding@resend.dev', // Use your verified domain
           to: email,
           subject: 'Password Reset Request - FootLong Blog',
-          html: `
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                  body {
-                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                    line-height: 1.6;
-                    color: #e8e8ff;
-                    background-color: #0a0a1a;
-                    margin: 0;
-                    padding: 0;
-                  }
-                  .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                  }
-                  .header {
-                    text-align: center;
-                    padding: 30px 0;
-                    border-bottom: 1px solid rgba(168, 85, 247, 0.3);
-                  }
-                  .header h1 {
-                    color: #a855f7;
-                    font-size: 24px;
-                    margin: 0;
-                    font-family: 'Space Mono', monospace;
-                  }
-                  .content {
-                    padding: 30px 0;
-                  }
-                  .greeting {
-                    font-size: 18px;
-                    color: #ffffff;
-                    margin-bottom: 15px;
-                  }
-                  .message {
-                    color: #e8e8ff;
-                    margin-bottom: 25px;
-                  }
-                  .button-container {
-                    text-align: center;
-                    margin: 30px 0;
-                  }
-                  .button {
-                    display: inline-block;
-                    padding: 12px 30px;
-                    background: linear-gradient(135deg, #a855f7, #3b82f6);
-                    color: #ffffff;
-                    text-decoration: none;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    font-size: 16px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  }
-                  .link-text {
-                    color: #8888aa;
-                    font-size: 12px;
-                    word-break: break-all;
-                    margin-top: 15px;
-                  }
-                  .link-text a {
-                    color: #3b82f6;
-                  }
-                  .warning {
-                    background: rgba(234, 179, 8, 0.1);
-                    border: 1px solid rgba(234, 179, 8, 0.3);
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin: 20px 0;
-                    color: #fbbf24;
-                    font-size: 14px;
-                  }
-                  .footer {
-                    text-align: center;
-                    padding: 20px 0;
-                    border-top: 1px solid rgba(168, 85, 247, 0.3);
-                    color: #8888aa;
-                    font-size: 12px;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="container">
-                  <div class="header">
-                    <h1>🎬 FootLong Blog</h1>
-                  </div>
-                  <div class="content">
-                    <p class="greeting">Hello,</p>
-                    <p class="message">
-                      You have requested to reset your password for your FootLong Blog account. 
-                      Click the button below to create a new password:
-                    </p>
-                    <div class="button-container">
-                      <a href="${resetLink}" class="button">Reset Password</a>
-                    </div>
-                    <p class="link-text">
-                      Or copy and paste this link into your browser:<br>
-                      <a href="${resetLink}">${resetLink}</a>
-                    </p>
-                    <div class="warning">
-                      <strong>⚠️ Important:</strong> This link will expire in 1 hour. 
-                      If you did not request this password reset, please ignore this email and your password will remain unchanged.
-                    </div>
-                  </div>
-                  <div class="footer">
-                    <p>This is an automated message from FootLong Blog.</p>
-                    <p>&copy; ${new Date().getFullYear()} FootLong Blog. All rights reserved.</p>
-                  </div>
-                </div>
-              </body>
-            </html>
-          `,
           text: `
-            Hello,
+Hello,
 
-            You have requested to reset your password for your FootLong Blog account.
-            Click the link below to create a new password:
+You have requested to reset your password for your FootLong Blog account.
+Click the link below to create a new password:
 
-            ${resetLink}
+${resetLink}
 
-            This link will expire in 1 hour.
+This link will expire in 1 hour.
 
-            If you did not request this password reset, please ignore this email and your password will remain unchanged.
+If you did not request this password reset, please ignore this email and your password will remain unchanged.
 
-            ---
-            FootLong Blog
+---
+FootLong Blog
+          `,
+          html: `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+        color: #e8e8ff;
+        background-color: #0a0a1a;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        text-align: center;
+        padding: 30px 0;
+        border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+      }
+      .header h1 {
+        color: #a855f7;
+        font-size: 24px;
+        margin: 0;
+        font-family: 'Space Mono', monospace;
+      }
+      .content {
+        padding: 30px 0;
+      }
+      .greeting {
+        font-size: 18px;
+        color: #ffffff;
+        margin-bottom: 15px;
+      }
+      .message {
+        color: #e8e8ff;
+        margin-bottom: 25px;
+      }
+      .button-container {
+        text-align: center;
+        margin: 30px 0;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #a855f7, #3b82f6);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .link-text {
+        color: #8888aa;
+        font-size: 12px;
+        word-break: break-all;
+        margin-top: 15px;
+      }
+      .link-text a {
+        color: #3b82f6;
+      }
+      .warning {
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        color: #fbbf24;
+        font-size: 14px;
+      }
+      .footer {
+        text-align: center;
+        padding: 20px 0;
+        border-top: 1px solid rgba(168, 85, 247, 0.3);
+        color: #8888aa;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎬 FootLong Blog</h1>
+      </div>
+      <div class="content">
+        <p class="greeting">Hello,</p>
+        <p class="message">
+          You have requested to reset your password for your FootLong Blog account. 
+          Click the button below to create a new password:
+        </p>
+        <div class="button-container">
+          <a href="${resetLink}" class="button">Reset Password</a>
+        </div>
+        <p class="link-text">
+          Or copy and paste this link into your browser:<br>
+          <a href="${resetLink}">${resetLink}</a>
+        </p>
+        <div class="warning">
+          <strong>⚠️ Important:</strong> This link will expire in 1 hour. 
+          If you did not request this password reset, please ignore this email and your password will remain unchanged.
+        </div>
+      </div>
+      <div class="footer">
+        <p>This is an automated message from FootLong Blog.</p>
+        <p>&copy; ${new Date().getFullYear()} FootLong Blog. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
           `
         });
         console.log(`Password reset email sent to ${email}`);
       } catch (emailError) {
         console.error('Failed to send email:', emailError);
-        // Still return success to not reveal email issues
       }
     } else {
-      // No SMTP configured - log the link for development/testing
-      console.log('SMTP not configured. Password reset link (development only):');
+      // No Resend configured - log the link for development/testing
+      console.log('Resend not configured. Password reset link (development only):');
       console.log(resetLink);
     }
 
