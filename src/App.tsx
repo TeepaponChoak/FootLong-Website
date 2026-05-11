@@ -2,6 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './AuthContext';
 import { Navbar } from './components/Navbar';
 import { Home } from './components/Home';
+import { AnnouncementsPage } from './components/AnnouncementsPage';
+import { TipsPage } from './components/TipsPage';
+import { TeamPage } from './components/TeamPage';
+import { UpdatesPage } from './components/UpdatesPage';
 import { Login } from './components/Login';
 import { Register } from './components/Register';
 import { CreatePost } from './components/CreatePost';
@@ -27,6 +31,10 @@ function AppRoutes() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/announcements" element={<AnnouncementsPage />} />
+        <Route path="/tips" element={<TipsPage />} />
+        <Route path="/team" element={<TeamPage />} />
+        <Route path="/updates" element={<UpdatesPage />} />
         <Route path="/post/:id" element={<PostDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
