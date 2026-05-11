@@ -56,10 +56,12 @@ export const authAPI = {
 export const userManagementAPI = {
   getAllUsers: () => apiRequest("/api/users"),
 
-  updateUserRole: (userId: string, isAdmin: boolean) =>
-    apiRequest(`/api/users/${userId}/role`, {
+  getRoles: () => apiRequest("/api/roles"),
+
+  updateUserRoles: (userId: string, roles: string[], isAdmin?: boolean) =>
+    apiRequest(`/api/users/${userId}/roles`, {
       method: "PUT",
-      body: JSON.stringify({ isAdmin }),
+      body: JSON.stringify({ roles, isAdmin }),
     }),
 };
 

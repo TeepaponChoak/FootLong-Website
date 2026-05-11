@@ -4,6 +4,7 @@ export interface User {
   email: string;
   bio?: string;
   isAdmin?: boolean;
+  roles?: string[];
 }
 
 export interface BlogPost {

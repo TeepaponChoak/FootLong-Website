@@ -948,8 +948,11 @@ button:disabled {
   margin-top: 0.25rem;
 }
 
-.crew-member-role {
+.crew-member-roles {
   margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 
 .role-badge {
@@ -978,6 +981,88 @@ button:disabled {
 
 .crew-member-actions {
   flex-shrink: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.role-selector {
+  position: relative;
+}
+
+.role-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0.4rem 2rem 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  border-radius: 6px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  outline: none;
+}
+
+.role-select:hover {
+  border-color: var(--color-accent);
+  background: rgba(168, 85, 247, 0.25);
+}
+
+.role-select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.role-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.role-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: 300px;
+}
+
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.role-checkbox:hover {
+  border-color: var(--color-accent);
+  background: rgba(168, 85, 247, 0.2);
+}
+
+.role-checkbox input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+
+.role-checkbox input[type="checkbox"]:checked + span {
+  color: var(--color-accent);
+}
+
+.role-checkbox:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-role {
@@ -1083,6 +1168,12 @@ button:disabled {
     width: 100%;
     margin-top: 0.5rem;
     padding-left: 52px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .role-checkboxes {
+    max-width: 100%;
   }
   
   .crew-legend {

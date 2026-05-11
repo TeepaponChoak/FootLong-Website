@@ -22,13 +22,22 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("MongoDB connection error:", err));
 
+// Movie Production Roles
+const productionRoles = [
+  'Director', 'Producer', 'Editor', 'Gaffer', 
+  'Grip', 'Sound Mixer', 'Camera Operator', 'Script Supervisor',
+  'Production Designer', 'Costume Designer', 'Makeup Artist', 'Stunt Coordinator',
+  'Visual Effects', 'Colorist', 'Casting Director', 'Location Manager'
+];
+
 // User Schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   bio: { type: String, default: "" },
-  isAdmin: { type: Boolean, default: false }
+  isAdmin: { type: Boolean, default: false },
+  roles: { type: [String], default: ['Crew Member'] }
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
@@ -94,11 +103,11 @@ app.post("/api/register", async (req, res) => {
     const user = new User({ username, email, password: hashedPassword });
     await user.save();
 
-    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin, roles: user.roles }, process.env.JWT_SECRET);
 
     res.json({
       token,
-      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin }
+      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin, roles: user.roles }
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -119,15 +128,19 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, isAdmin: user.isAdmin, roles: user.roles }, process.env.JWT_SECRET);
 
     res.json({
       token,
-      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin }
+      user: { id: user._id, username: user.username, email: user.email, bio: user.bio, isAdmin: user.isAdmin, roles: user.roles }
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
+});
+
+app.get("/api/roles", (req, res) => {
+  res.json(productionRoles);
 });
 
 app.get("/api/user", authenticateToken, async (req, res) => {
@@ -150,6 +163,7 @@ app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
       email: user.email,
       bio: user.bio,
       isAdmin: user.isAdmin,
+      roles: user.roles,
       createdAt: user.createdAt
     }));
     res.json(formattedUsers);
@@ -158,10 +172,10 @@ app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
-// Update user role (admin only)
-app.put("/api/users/:id/role", authenticateToken, requireAdmin, async (req, res) => {
+// Update user roles (admin only)
+app.put("/api/users/:id/roles", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { isAdmin } = req.body;
+    const { roles, isAdmin } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     
@@ -170,7 +184,8 @@ app.put("/api/users/:id/role", authenticateToken, requireAdmin, async (req, res)
       return res.status(400).json({ message: "Cannot remove your own admin role" });
     }
     
-    user.isAdmin = isAdmin;
+    if (roles !== undefined) user.roles = roles;
+    if (isAdmin !== undefined) user.isAdmin = isAdmin;
     await user.save();
     
     res.json({
@@ -178,7 +193,8 @@ app.put("/api/users/:id/role", authenticateToken, requireAdmin, async (req, res)
       username: user.username,
       email: user.email,
       bio: user.bio,
-      isAdmin: user.isAdmin
+      isAdmin: user.isAdmin,
+      roles: user.roles
     });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
