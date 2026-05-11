@@ -40,7 +40,7 @@ export const authAPI = {
 
   getUser: () => apiRequest("/api/user"),
 
-  updateProfile: (updates: { bio?: string }) =>
+  updateProfile: (updates: { bio?: string; password?: string }) =>
     apiRequest("/api/user", {
       method: "PUT",
       body: JSON.stringify(updates),

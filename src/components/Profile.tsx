@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { blogAPI } from '../api';
+import { blogAPI, authAPI } from '../api';
 import type { BlogPost } from '../types';
-import { User, Mail, FileText, Trash2, AlertTriangle, ArrowLeft, Edit, Crown } from 'lucide-react';
+import { User, Mail, FileText, Trash2, AlertTriangle, ArrowLeft, Edit, Crown, Lock, Eye, EyeOff } from 'lucide-react';
 import { UserManagement } from './UserManagement';
 
 export function Profile() {
@@ -15,6 +15,15 @@ export function Profile() {
   const [userPosts, setUserPosts] = useState<BlogPost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [updating, setUpdating] = useState(false);
 
@@ -69,6 +78,39 @@ export function Profile() {
       navigate('/');
     } catch (error) {
       console.error('Failed to delete account:', error);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setPasswordMessage('Password must be at least 6 characters');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage('Passwords do not match');
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      // First login with current password to verify
+      const loginSuccess = await authAPI.login(user.email, currentPassword);
+      if (loginSuccess) {
+        // Then update the password
+        await authAPI.updateProfile({ password: newPassword });
+        setPasswordMessage('Password changed successfully!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setTimeout(() => {
+          setShowPasswordModal(false);
+          setPasswordMessage('');
+        }, 3000);
+      }
+    } catch (error) {
+      setPasswordMessage('Failed to change password. Please check your current password.');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -195,6 +237,18 @@ export function Profile() {
                 <p style={{ color: '#4ade80', marginBottom: '1rem' }}>{message}</p>
               )}
 
+              <div className="form-group">
+                <button 
+                  type="button" 
+                  onClick={() => setShowPasswordModal(true)}
+                  className="btn btn-secondary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }}
+                >
+                  <Lock size={16} />
+                  Change Password
+                </button>
+              </div>
+
               <div className="flex-between">
                 <button type="submit" disabled={updating}>
                   {updating ? 'Saving...' : 'Save Changes'}
@@ -236,6 +290,121 @@ export function Profile() {
                     Delete Account
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {showPasswordModal && (
+            <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h3 className="modal-title">Change Password</h3>
+                <form onSubmit={handlePasswordChange}>
+                  <div className="form-group">
+                    <label htmlFor="currentPassword">Current Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        id="currentPassword"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="Enter current password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--color-muted)'
+                        }}
+                      >
+                        {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="newPassword">New Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        id="newPassword"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter new password"
+                        required
+                        minLength={6}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--color-muted)'
+                        }}
+                      >
+                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="confirmPassword">Confirm New Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm new password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={{
+                          position: 'absolute',
+                          right: '10px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: 'var(--color-muted)'
+                        }}
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                  {passwordMessage && (
+                    <p style={{ 
+                      color: passwordMessage.includes('success') ? '#4ade80' : '#f87171',
+                      fontSize: '0.875rem',
+                      marginBottom: '1rem'
+                    }}>
+                      {passwordMessage}
+                    </p>
+                  )}
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setShowPasswordModal(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={changingPassword}>
+                      {changingPassword ? 'Changing...' : 'Change Password'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

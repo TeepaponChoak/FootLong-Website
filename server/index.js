@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Movie Production Roles
 const productionRoles = [
-  'Director', 'Producer', 'Editor', 'Gaffer', 
+  'Director', 'Producer', 'Production Manager', 'Editor', 'Gaffer', 
   'Grip', 'Sound Mixer', 'Camera Operator', 'Script Supervisor',
   'Production Designer', 'Costume Designer', 'Makeup Artist', 'Stunt Coordinator',
   'Visual Effects', 'Colorist', 'Casting Director', 'Location Manager'
@@ -278,10 +278,17 @@ app.delete("/api/announcements/:id", authenticateToken, requireAdmin, async (req
 
 app.put("/api/user", authenticateToken, async (req, res) => {
   try {
-    const { bio } = req.body;
+    const { bio, password } = req.body;
+    const updateData = {};
+    
+    if (bio !== undefined) updateData.bio = bio;
+    if (password !== undefined) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+    
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { bio },
+      updateData,
       { new: true }
     ).select("-password");
     res.json(user);

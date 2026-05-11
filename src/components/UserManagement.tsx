@@ -9,7 +9,7 @@ interface ExtendedUser extends User {
 }
 
 const productionRoles = [
-  'Director', 'Producer', 'Editor', 'Gaffer', 
+  'Director', 'Producer', 'Production Manager', 'Editor', 'Gaffer', 
   'Grip', 'Sound Mixer', 'Camera Operator', 'Script Supervisor',
   'Production Designer', 'Costume Designer', 'Makeup Artist', 'Stunt Coordinator',
   'Visual Effects', 'Colorist', 'Casting Director', 'Location Manager', 'Crew Member'
