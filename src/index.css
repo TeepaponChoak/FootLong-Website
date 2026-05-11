@@ -150,12 +150,24 @@ nav {
   justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
+  position: relative;
 }
 
 .nav-left {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  flex: 1;
+}
+
+/* Center the navigation tabs */
+.nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .logo {
@@ -172,13 +184,6 @@ nav {
 
 .logo:hover {
   text-shadow: 0 0 30px var(--color-accent), 0 0 60px var(--color-glow);
-}
-
-/* Navigation Tabs */
-.nav-links {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
 }
 
 .nav-tab {

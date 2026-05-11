@@ -1,20 +1,15 @@
-import { BlogList } from './BlogList';
 import { AnnouncementPanel } from './AnnouncementPanel';
 
 export function Home() {
   return (
     <div className="container">
-      <section className="mb-2">
-        <h2>FootLong Announce</h2>
-        <AnnouncementPanel />
-      </section>
       <header className="mb-2">
-        <h1>FootLong Tips</h1>
+        <h1>FootLong Announce</h1>
         <p style={{ color: 'var(--color-muted)' }}>
-          Tips and ideas from across the universe.
+          Official announcements and updates from the production team.
         </p>
       </header>
-      <BlogList />
+      <AnnouncementPanel />
     </div>
   );
 }

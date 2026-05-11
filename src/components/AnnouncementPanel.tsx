@@ -133,7 +133,8 @@ export function AnnouncementPanel() {
   }
 
   const latestAnnouncement = announcements.length > 0 ? announcements[0] : null;
-  const announcementHistory = announcements.length > 1 ? announcements.slice(1) : [];
+  // Get history and reverse so older announcements are at the bottom
+  const announcementHistory = announcements.length > 1 ? [...announcements.slice(1)].reverse() : [];
   const hasSidebar = announcementHistory.length > 0;
 
   return (

@@ -9,7 +9,6 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Home' },
     { path: '/tips', label: 'FootLong Tips' },
     { path: '/team', label: 'Team' },
     { path: '/updates', label: 'Updates' },
@@ -20,10 +19,11 @@ export function Navbar() {
   return (
     <nav>
       <div className="nav-content">
-        {/* Left Side: Logo + Navigation Tabs */}
+        {/* Left Side: Logo */}
         <div className="nav-left">
           <Link to="/" className="logo">FOOTLONG_WEB</Link>
           
+          {/* Center Navigation Tabs */}
           <div className="nav-links">
             {navItems.map((item) => (
               <Link 
@@ -56,7 +56,7 @@ export function Navbar() {
                     <User size={14} />
                     <span>Profile</span>
                   </Link>
-                  <button onClick={logout} className="dropdown-item">
+                  <button onClick={logout} className="dropdown-item logout-btn">
                     <LogOut size={14} />
                     <span>Logout</span>
                   </button>
