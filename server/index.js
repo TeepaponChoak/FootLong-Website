@@ -277,6 +277,22 @@ app.get("/api/user", authenticateToken, async (req, res) => {
   }
 });
 
+// Get team members (public - for "Our Team" section)
+app.get("/api/team", async (req, res) => {
+  try {
+    const users = await User.find().select("username isAdmin roles").sort({ createdAt: -1 });
+    const formattedUsers = users.map(user => ({
+      id: user._id.toString(),
+      username: user.username,
+      isAdmin: user.isAdmin,
+      roles: user.roles
+    }));
+    res.json(formattedUsers);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Get all users (admin only)
 app.get("/api/users", authenticateToken, requireAdmin, async (req, res) => {
   try {

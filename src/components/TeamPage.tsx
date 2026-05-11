@@ -2,20 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { UserManagement } from './UserManagement';
 import { Users, Crown, User } from 'lucide-react';
-import { userManagementAPI } from '../api';
+import { teamAPI } from '../api';
 
 interface TeamMember {
   id: string;
   username: string;
-  email: string;
-  roles?: string[];
-  isAdmin?: boolean;
-}
-
-interface ApiUser {
-  id: string;
-  username: string;
-  email: string;
   roles?: string[];
   isAdmin?: boolean;
 }
@@ -29,16 +20,8 @@ export function TeamPage() {
     const fetchTeam = async () => {
       try {
         setLoading(true);
-        // Fetch real user data from API
-        const users: ApiUser[] = await userManagementAPI.getAllUsers();
-        // Transform to TeamMember format
-        const members: TeamMember[] = users.map(u => ({
-          id: u.id,
-          username: u.username,
-          email: u.email,
-          roles: u.roles || (u.isAdmin ? ['director'] : ['crew']),
-          isAdmin: u.isAdmin
-        }));
+        // Fetch team members from public API
+        const members: TeamMember[] = await teamAPI.getTeamMembers();
         setTeamMembers(members);
       } catch (error) {
         console.error('Failed to load team members:', error);
@@ -104,7 +87,6 @@ export function TeamPage() {
                   {member.username}
                   {member.id === user?.id && <span className="current-user-badge">(you)</span>}
                 </h3>
-                <p className="team-member-email">{member.email}</p>
                 <div className="team-member-roles">
                   {member.roles?.map((role) => (
                     <span 

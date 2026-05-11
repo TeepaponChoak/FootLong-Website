@@ -52,6 +52,11 @@ export const authAPI = {
     }),
 };
 
+// Team API (Public - for "Our Team" section)
+export const teamAPI = {
+  getTeamMembers: () => apiRequest("/api/team"),
+};
+
 // User Management API (Admin only)
 export const userManagementAPI = {
   getAllUsers: () => apiRequest("/api/users"),
