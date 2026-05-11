@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { announcementAPI } from '../api';
 import type { Announcement } from '../types';
-import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard } from 'lucide-react';
+import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export function AnnouncementPanel() {
   const { user } = useAuth();
@@ -15,6 +15,9 @@ export function AnnouncementPanel() {
   const [editImage, setEditImage] = useState('');
   const [editLink, setEditLink] = useState('');
   const [isNew, setIsNew] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [expandedAnnouncement, setExpandedAnnouncement] = useState<string | null>(null);
 
   const isAdmin = user?.isAdmin;
 
@@ -80,14 +83,30 @@ export function AnnouncementPanel() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this announcement?')) return;
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
     try {
-      await announcementAPI.deleteAnnouncement(id);
+      await announcementAPI.deleteAnnouncement(deleteTargetId);
+      setShowDeleteConfirm(false);
+      setDeleteTargetId(null);
       loadAnnouncements();
     } catch (error) {
       console.error('Failed to delete announcement:', error);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteTargetId(null);
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedAnnouncement(expandedAnnouncement === id ? null : id);
   };
 
   const handleCancel = () => {
@@ -188,29 +207,73 @@ export function AnnouncementPanel() {
                 <Clapperboard size={16} /> Previous Announcements
               </h3>
               <div className="history-sidebar-list">
-                {announcementHistory.map((ann) => (
-                  <div key={ann.id} className="history-sidebar-item">
-                    <div className="history-sidebar-item-header">
-                      <h4>{ann.title}</h4>
+                {announcementHistory.map((ann) => {
+                  const isExpanded = expandedAnnouncement === ann.id;
+                  return (
+                    <div key={ann.id} className={`history-sidebar-item ${isExpanded ? 'expanded' : ''}`}>
+                      <div 
+                        className="history-sidebar-item-header" 
+                        onClick={() => toggleExpand(ann.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <h4>{ann.title}</h4>
+                        <span className="history-sidebar-toggle">
+                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </span>
+                      </div>
                       <span className="history-sidebar-date">
                         {new Date(ann.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
-                          day: 'numeric'
+                          day: 'numeric',
+                          year: 'numeric'
                         })}
                       </span>
+                      {isExpanded && (
+                        <div className="history-sidebar-item-content">
+                          <p className="history-sidebar-item-text">{ann.content}</p>
+                          {ann.image && (
+                            <img 
+                              src={ann.image} 
+                              alt={ann.title}
+                              className="history-sidebar-item-image"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          )}
+                          {ann.link && (
+                            <a 
+                              href={ann.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="history-sidebar-item-link"
+                            >
+                              <ExternalLink size={12} /> Learn More
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      {isAdmin && (
+                        <div className="history-sidebar-item-actions">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleEdit(ann); }} 
+                            className="btn-icon-small" 
+                            title="Edit"
+                          >
+                            <Edit2 size={12} />
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteClick(ann.id); }} 
+                            className="btn-icon-small btn-icon-delete" 
+                            title="Delete"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {isAdmin && (
-                      <div className="history-sidebar-item-actions">
-                        <button onClick={() => handleEdit(ann)} className="btn-icon-small" title="Edit">
-                          <Edit2 size={12} />
-                        </button>
-                        <button onClick={() => handleDelete(ann.id)} className="btn-icon-small btn-icon-delete" title="Delete">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </aside>
           )}
@@ -264,7 +327,7 @@ export function AnnouncementPanel() {
                     <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
                       <Edit2 size={14} />
                     </button>
-                    <button onClick={() => handleDelete(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
+                    <button onClick={() => handleDeleteClick(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -320,17 +383,58 @@ export function AnnouncementPanel() {
                 })}
               </span>
               {isAdmin && (
-                <div className="announcement-actions">
-                  <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
-                    <Edit2 size={14} />
-                  </button>
-                  <button onClick={() => handleDelete(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
+              <div className="announcement-actions">
+                    <button onClick={() => handleEdit(latestAnnouncement)} className="btn-icon" title="Edit">
+                      <Edit2 size={14} />
+                    </button>
+                    <button onClick={() => handleDeleteClick(latestAnnouncement.id)} className="btn-icon btn-icon-delete" title="Delete">
                     <Trash2 size={14} />
                   </button>
                 </div>
               )}
             </div>
           </article>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteConfirm && (
+        <div
+          className="modal-overlay"
+          onClick={handleDeleteCancel}
+        >
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-icon">
+              <AlertTriangle size={48} />
+            </div>
+
+            <h3 className="modal-title">
+              Delete Announcement?
+            </h3>
+
+            <p className="modal-text">
+              Are you sure you want to delete this announcement? This action cannot be undone.
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="btn-secondary"
+                onClick={handleDeleteCancel}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn-delete"
+                onClick={handleDeleteConfirm}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
