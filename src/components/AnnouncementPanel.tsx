@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { announcementAPI } from '../api';
 import type { Announcement } from '../types';
-import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard, AlertTriangle, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 
 export function AnnouncementPanel() {
   const { user } = useAuth();
@@ -107,6 +108,11 @@ export function AnnouncementPanel() {
 
   const toggleExpand = (id: string) => {
     setExpandedAnnouncement(expandedAnnouncement === id ? null : id);
+  };
+
+  const truncateContent = (content: string, maxLength: number = 300) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength).trim() + '...';
   };
 
   const handleCancel = () => {
@@ -301,7 +307,7 @@ export function AnnouncementPanel() {
               
               <h2 className="announcement-title">{latestAnnouncement.title}</h2>
               <div className="announcement-content">
-                {latestAnnouncement.content}
+                {truncateContent(latestAnnouncement.content)}
               </div>
               
               {latestAnnouncement.link && (
@@ -314,6 +320,13 @@ export function AnnouncementPanel() {
                   <ExternalLink size={14} /> Learn More
                 </a>
               )}
+              
+              <Link 
+                to={`/announcement/${latestAnnouncement.id}`} 
+                className="announcement-read-more"
+              >
+                Read Full Announcement <ArrowRight size={14} />
+              </Link>
               
               <div className="announcement-meta">
                 <span className="announcement-date">

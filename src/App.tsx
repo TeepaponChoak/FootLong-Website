@@ -9,6 +9,7 @@ import { PostDetail } from './components/PostDetail';
 import { Profile } from './components/Profile';
 import { NotFound } from './components/NotFound';
 import { ResetPassword } from './components/ResetPassword';
+import { AnnouncementDetail } from './components/AnnouncementDetail';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -39,6 +40,7 @@ function AppRoutes() {
           } 
         />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/announcement/:id" element={<AnnouncementDetail />} />
         <Route path="/blog" element={<Home />} />
         <Route path="/search" element={<Home />} />
         <Route path="*" element={<NotFound />} />
