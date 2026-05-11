@@ -190,25 +190,27 @@ export function AnnouncementPanel() {
               <div className="history-sidebar-list">
                 {announcementHistory.map((ann) => (
                   <div key={ann.id} className="history-sidebar-item">
-                    <div className="history-sidebar-item-header">
-                      <h4>{ann.title}</h4>
-                      <span className="history-sidebar-date">
-                        {new Date(ann.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    {isAdmin && (
-                      <div className="history-sidebar-item-actions">
-                        <button onClick={() => handleEdit(ann)} className="btn-icon-small" title="Edit">
-                          <Edit2 size={12} />
-                        </button>
-                        <button onClick={() => handleDelete(ann.id)} className="btn-icon-small btn-icon-delete" title="Delete">
-                          <Trash2 size={12} />
-                        </button>
+                    <div className="history-sidebar-item-content">
+                      <div className="history-sidebar-item-header">
+                        <h4>{ann.title}</h4>
+                        <span className="history-sidebar-date">
+                          {new Date(ann.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
                       </div>
-                    )}
+                      {isAdmin && (
+                        <div className="history-sidebar-item-actions-inline">
+                          <button onClick={() => handleEdit(ann)} className="btn-icon-small" title="Edit">
+                            <Edit2 size={12} />
+                          </button>
+                          <button onClick={() => handleDelete(ann.id)} className="btn-icon-small btn-icon-delete" title="Delete">
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

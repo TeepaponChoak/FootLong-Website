@@ -101,8 +101,8 @@ export function CreatePost() {
   };
 
   return (
-    <div className="container">
-      <div className="announcement-editor" style={{ marginTop: '2rem' }}>
+    <div className="container" style={{ paddingTop: '1rem' }}>
+      <div className="announcement-editor">
         <div className="editor-header">
           <h3>
             <FileText size={18} />
