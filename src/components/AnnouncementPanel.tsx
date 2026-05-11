@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { announcementAPI } from '../api';
 import type { Announcement } from '../types';
-import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard, AlertTriangle, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
+import { Megaphone, Edit2, Trash2, Plus, X, Save, ExternalLink, Image as ImageIcon, Clapperboard, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export function AnnouncementPanel() {
   const { user } = useAuth();
@@ -307,7 +307,16 @@ export function AnnouncementPanel() {
               
               <h2 className="announcement-title">{latestAnnouncement.title}</h2>
               <div className="announcement-content">
-                {truncateContent(latestAnnouncement.content)}
+                {latestAnnouncement.content.length > 300 ? (
+                  <>
+                    {truncateContent(latestAnnouncement.content)}{' '}
+                    <Link to={`/announcement/${latestAnnouncement.id}`} className="announcement-read-more-inline">
+                      Read more
+                    </Link>
+                  </>
+                ) : (
+                  latestAnnouncement.content
+                )}
               </div>
               
               {latestAnnouncement.link && (
@@ -320,13 +329,6 @@ export function AnnouncementPanel() {
                   <ExternalLink size={14} /> Learn More
                 </a>
               )}
-              
-              <Link 
-                to={`/announcement/${latestAnnouncement.id}`} 
-                className="announcement-read-more"
-              >
-                Read Full Announcement <ArrowRight size={14} />
-              </Link>
               
               <div className="announcement-meta">
                 <span className="announcement-date">
