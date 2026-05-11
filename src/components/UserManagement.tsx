@@ -156,18 +156,40 @@ export function UserManagement() {
               </div>
 
               <div className="crew-member-actions">
-                <div className="role-checkboxes">
-                  {availableRoles.map((role) => (
-                    <label key={role} className="role-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={userRoles.includes(role)}
-                        onChange={() => toggleUserRole(user.id, userRoles, role)}
-                        disabled={isCurrentUser && isDirector}
-                      />
-                      <span>{role}</span>
-                    </label>
-                  ))}
+                <div className="role-dropdown">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        toggleUserRole(user.id, userRoles, e.target.value);
+                      }
+                    }}
+                    className="role-select-multi"
+                    disabled={isCurrentUser && isDirector}
+                  >
+                    <option value="">Select roles...</option>
+                    {availableRoles.map((role) => (
+                      <option key={role} value={role} disabled={userRoles.includes(role)}>
+                        {role} {userRoles.includes(role) ? '✓' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="selected-roles">
+                    {userRoles.map((role) => (
+                      <span key={role} className="selected-role-tag">
+                        {role}
+                        {!isCurrentUser && (
+                          <button
+                            onClick={() => toggleUserRole(user.id, userRoles, role)}
+                            className="remove-role-btn"
+                            title={`Remove ${role}`}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
                 </div>
                 {!isCurrentUser && (
                   isDirector ? (
@@ -197,11 +219,11 @@ export function UserManagement() {
       <div className="crew-legend">
         <div className="legend-item">
           <Crown size={14} className="legend-director" />
-          <span>Director (Admin)</span>
+          <span>Admin</span>
         </div>
         <div className="legend-item">
           <UserIcon size={14} className="legend-crew" />
-          <span>Crew Member (User)</span>
+          <span>User</span>
         </div>
       </div>
     </div>
