@@ -13,6 +13,7 @@ export interface BlogPost {
   content: string;
   author: string;
   authorId: string;
+  authorRoles?: string[];
   createdAt: string;
   tags: string[];
   images?: string[];

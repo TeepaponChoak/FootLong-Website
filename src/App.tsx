@@ -7,6 +7,7 @@ import { Register } from './components/Register';
 import { CreatePost } from './components/CreatePost';
 import { PostDetail } from './components/PostDetail';
 import { Profile } from './components/Profile';
+import { NotFound } from './components/NotFound';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -36,6 +37,7 @@ function AppRoutes() {
           } 
         />
         <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

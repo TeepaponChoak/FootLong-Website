@@ -2,23 +2,16 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { userManagementAPI } from '../api';
 import type { User } from '../types';
-import { Users, Clapperboard, Star, User as UserIcon, Check, X, Crown } from 'lucide-react';
+import { Users, Crown, Check, X } from 'lucide-react';
 
 interface ExtendedUser extends User {
   createdAt: string;
 }
 
-const productionRoles = [
-  'Director', 'Producer', 'Production Manager', 'Editor', 'Gaffer', 
-  'Grip', 'Sound Mixer', 'Camera Operator', 'Script Supervisor',
-  'Production Designer', 'Costume Designer', 'Makeup Artist', 'Stunt Coordinator',
-  'Visual Effects', 'Colorist', 'Casting Director', 'Location Manager', 'Crew Member'
-];
-
 export function UserManagement() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<ExtendedUser[]>([]);
-  const [availableRoles, setAvailableRoles] = useState<string[]>(productionRoles);
+  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -38,7 +31,7 @@ export function UserManagement() {
       setUsers(data);
     } catch (error) {
       console.error('Failed to load users:', error);
-      setMessage('Failed to load cast & crew');
+      setMessage('Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -53,69 +46,64 @@ export function UserManagement() {
     }
   };
 
-  const toggleUserRole = async (userId: string, currentRoles: string[], roleToToggle: string) => {
+  const addRole = async (userId: string, currentRoles: string[], role: string) => {
+    if (currentRoles.includes(role)) return;
     try {
       let newRoles = [...currentRoles];
-      if (newRoles.includes(roleToToggle)) {
-        // Don't allow removing the last role
-        if (newRoles.length <= 1) {
-          setMessage('User must have at least one role');
-          setTimeout(() => setMessage(null), 3000);
-          return;
-        }
-        newRoles = newRoles.filter(r => r !== roleToToggle);
-      } else {
-        // Remove 'Crew Member' if adding another role
-        if (roleToToggle !== 'Crew Member') {
-          newRoles = newRoles.filter(r => r !== 'Crew Member');
-        }
-        newRoles.push(roleToToggle);
+      if (role !== 'Crew Member') {
+        newRoles = newRoles.filter(r => r !== 'Crew Member');
       }
+      newRoles.push(role);
       await userManagementAPI.updateUserRoles(userId, newRoles);
-      setMessage(`Roles updated`);
+      setMessage('Role added');
       loadUsers();
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 2000);
     } catch (error) {
-      console.error('Failed to update roles:', error);
-      setMessage('Failed to update roles');
-      setTimeout(() => setMessage(null), 3000);
+      setMessage('Failed to add role');
+      setTimeout(() => setMessage(null), 2000);
     }
   };
 
-  const toggleAdminRole = async (userId: string, currentIsAdmin: boolean) => {
+  const removeRole = async (userId: string, currentRoles: string[], role: string) => {
+    if (currentRoles.length <= 1) {
+      setMessage('User must have at least one role');
+      setTimeout(() => setMessage(null), 2000);
+      return;
+    }
+    try {
+      const newRoles = currentRoles.filter(r => r !== role);
+      await userManagementAPI.updateUserRoles(userId, newRoles);
+      setMessage('Role removed');
+      loadUsers();
+      setTimeout(() => setMessage(null), 2000);
+    } catch (error) {
+      setMessage('Failed to remove role');
+      setTimeout(() => setMessage(null), 2000);
+    }
+  };
+
+  const toggleAdmin = async (userId: string, currentIsAdmin: boolean) => {
     try {
       const newRoles = currentIsAdmin ? ['Crew Member'] : ['Director'];
       await userManagementAPI.updateUserRoles(userId, newRoles, !currentIsAdmin);
-      setMessage(currentIsAdmin ? 'Role revoked - Now Crew Member' : 'Role granted - Now Director');
+      setMessage(currentIsAdmin ? 'Admin revoked' : 'Admin granted');
       loadUsers();
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 2000);
     } catch (error) {
-      console.error('Failed to update role:', error);
-      setMessage('Failed to update role');
-      setTimeout(() => setMessage(null), 3000);
+      setMessage('Failed to update');
+      setTimeout(() => setMessage(null), 2000);
     }
   };
 
-  if (!isAdmin) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <div className="user-management-loading">
-        <p>Loading cast & crew...</p>
-      </div>
-    );
-  }
+  if (!isAdmin) return null;
+  if (loading) return <div className="user-management"><p>Loading users...</p></div>;
 
   return (
     <div className="user-management">
       <div className="user-management-header">
-        <h3>
-          <Clapperboard size={18} /> Cast & Crew Management
-        </h3>
+        <h3><Users size={18} /> User Management</h3>
         {message && (
-          <div className={`user-management-message ${message.includes('revoked') || message.includes('Failed') ? 'warning' : 'success'}`}>
+          <div className={`user-management-message ${message.includes('Failed') ? 'warning' : 'success'}`}>
             {message}
           </div>
         )}
@@ -126,6 +114,7 @@ export function UserManagement() {
           const isCurrentUser = user.id === currentUser?.id;
           const isDirector = user.isAdmin;
           const userRoles = user.roles || ['Crew Member'];
+          const unassignedRoles = availableRoles.filter(r => !userRoles.includes(r));
 
           return (
             <div 
@@ -133,11 +122,7 @@ export function UserManagement() {
               className={`crew-member ${isDirector ? 'crew-director' : ''} ${isCurrentUser ? 'crew-current' : ''}`}
             >
               <div className="crew-member-avatar">
-                {isDirector ? (
-                  <Crown size={20} className="director-icon" />
-                ) : (
-                  <UserIcon size={18} className="crew-icon" />
-                )}
+                {isDirector ? <Crown size={20} className="director-icon" /> : <Users size={18} className="crew-icon" />}
               </div>
 
               <div className="crew-member-info">
@@ -149,66 +134,60 @@ export function UserManagement() {
                 <div className="crew-member-roles">
                   {userRoles.map((role) => (
                     <span key={role} className={`role-badge ${isDirector ? 'role-director' : 'role-crew'}`}>
-                      {isDirector ? <Star size={12} /> : <Users size={12} />} {role}
+                      {role}
                     </span>
                   ))}
                 </div>
               </div>
 
               <div className="crew-member-actions">
-                <div className="role-dropdown">
-                  <select
-                    value=""
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        toggleUserRole(user.id, userRoles, e.target.value);
-                      }
-                    }}
-                    className="role-select-multi"
-                    disabled={isCurrentUser && isDirector}
-                  >
-                    <option value="">Select roles...</option>
-                    {availableRoles.map((role) => (
-                      <option key={role} value={role} disabled={userRoles.includes(role)}>
-                        {role} {userRoles.includes(role) ? '✓' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="selected-roles">
-                    {userRoles.map((role) => (
-                      <span key={role} className="selected-role-tag">
-                        {role}
-                        {!isCurrentUser && (
-                          <button
-                            onClick={() => toggleUserRole(user.id, userRoles, role)}
-                            className="remove-role-btn"
-                            title={`Remove ${role}`}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                </div>
                 {!isCurrentUser && (
-                  isDirector ? (
-                    <button
-                      onClick={() => toggleAdminRole(user.id, true)}
-                      className="btn-role btn-role-revoke"
-                      title="Revoke Director role"
-                    >
-                      <X size={14} /> Revoke
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => toggleAdminRole(user.id, false)}
-                      className="btn-role btn-role-promote"
-                      title="Grant Director role"
-                    >
-                      <Check size={14} /> Promote
-                    </button>
-                  )
+                  <>
+                    {unassignedRoles.length > 0 && (
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) addRole(user.id, userRoles, e.target.value);
+                        }}
+                        className="role-select"
+                      >
+                        <option value="">+ Add role</option>
+                        {unassignedRoles.map((role) => (
+                          <option key={role} value={role}>{role}</option>
+                        ))}
+                      </select>
+                    )}
+                    {userRoles.map((role) => (
+                      <button
+                        key={role}
+                        onClick={() => removeRole(user.id, userRoles, role)}
+                        className="btn-role btn-role-revoke"
+                        title={`Remove ${role}`}
+                      >
+                        × {role}
+                      </button>
+                    ))}
+                    {isDirector ? (
+                      <button
+                        onClick={() => toggleAdmin(user.id, true)}
+                        className="btn-role btn-role-revoke"
+                      >
+                        <X size={14} /> Revoke Admin
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => toggleAdmin(user.id, false)}
+                        className="btn-role btn-role-promote"
+                      >
+                        <Check size={14} /> Make Admin
+                      </button>
+                    )}
+                  </>
+                )}
+                {isCurrentUser && (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}>
+                    Your account
+                  </span>
                 )}
               </div>
             </div>
@@ -222,7 +201,7 @@ export function UserManagement() {
           <span>Admin</span>
         </div>
         <div className="legend-item">
-          <UserIcon size={14} className="legend-crew" />
+          <Users size={14} className="legend-crew" />
           <span>User</span>
         </div>
       </div>

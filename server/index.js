@@ -311,18 +311,22 @@ app.delete("/api/user", authenticateToken, async (req, res) => {
 app.get("/api/posts", async (req, res) => {
   try {
     const posts = await BlogPost.find().sort({ createdAt: -1 });
-    // Map _id to id for frontend compatibility
-    const formattedPosts = posts.map(post => ({
-      id: post._id.toString(),
-      title: post.title,
-      content: post.content,
-      author: post.author,
-      authorId: post.authorId.toString(),
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-      tags: post.tags,
-      images: post.images,
-      videoUrl: post.videoUrl
+    // Map _id to id for frontend compatibility and include author roles
+    const formattedPosts = await Promise.all(posts.map(async (post) => {
+      const author = await User.findById(post.authorId).select('roles');
+      return {
+        id: post._id.toString(),
+        title: post.title,
+        content: post.content,
+        author: post.author,
+        authorId: post.authorId.toString(),
+        authorRoles: author ? author.roles : ['Crew Member'],
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        tags: post.tags,
+        images: post.images,
+        videoUrl: post.videoUrl
+      };
     }));
     res.json(formattedPosts);
   } catch (error) {
@@ -334,13 +338,15 @@ app.get("/api/posts/:id", async (req, res) => {
   try {
     const post = await BlogPost.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
-    // Map _id to id for frontend compatibility
+    // Map _id to id for frontend compatibility and include author roles
+    const author = await User.findById(post.authorId).select('roles');
     res.json({
       id: post._id.toString(),
       title: post.title,
       content: post.content,
       author: post.author,
       authorId: post.authorId.toString(),
+      authorRoles: author ? author.roles : ['Crew Member'],
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       tags: post.tags,

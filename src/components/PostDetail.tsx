@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { blogAPI } from '../api';
 import type { BlogPost } from '../types';
-import { ArrowLeft, Calendar, User, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Trash2, AlertTriangle, Star, Users } from 'lucide-react';
 
 export function PostDetail() {
   const { id } = useParams<{ id: string }>();
@@ -175,11 +175,44 @@ export function PostDetail() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                gap: '0.5rem',
+                flexWrap: 'wrap',
               }}
             >
               <User size={14} />
-              {post.author}
+              <strong>{post.author}</strong>
+              {post.authorRoles && post.authorRoles.length > 0 && (
+                <span style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
+                  {post.authorRoles.map((role) => (
+                    <span
+                      key={role}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        fontSize: '0.7rem',
+                        padding: '0.15rem 0.5rem',
+                        background: role === 'Director' || post.authorRoles?.includes('Director')
+                          ? 'rgba(234, 179, 8, 0.15)'
+                          : 'rgba(168, 85, 247, 0.15)',
+                        border: `1px solid ${role === 'Director' || post.authorRoles?.includes('Director')
+                          ? 'rgba(234, 179, 8, 0.3)'
+                          : 'rgba(168, 85, 247, 0.3)'}`,
+                        borderRadius: '12px',
+                        color: role === 'Director' || post.authorRoles?.includes('Director')
+                          ? '#fbbf24'
+                          : 'var(--color-accent)',
+                        fontFamily: 'var(--font-mono)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {role === 'Director' ? <Star size={10} /> : <Users size={10} />}
+                      {role}
+                    </span>
+                  ))}
+                </span>
+              )}
             </span>
 
             <span

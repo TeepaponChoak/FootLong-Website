@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { blogAPI } from '../api';
+import { Image, X, Link, Youtube, FileText, Tag, Upload } from 'lucide-react';
 
 export function CreatePost() {
   const [title, setTitle] = useState('');
@@ -101,157 +102,160 @@ export function CreatePost() {
 
   return (
     <div className="container">
-      <h2 className="mb-2">Share a Tip</h2>
-      {error && <p className="error">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Give your tip a title"
-          />
+      <div className="announcement-editor" style={{ marginTop: '2rem' }}>
+        <div className="editor-header">
+          <h3>
+            <FileText size={18} />
+            Create New Post
+          </h3>
         </div>
-        <div className="form-group">
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Share your tip or idea with the crew..."
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="tags">Tags (comma-separated)</label>
-          <input
-            type="text"
-            id="tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="productivity, workflow, inspiration"
-          />
-        </div>
-        <div className="form-group">
-          <label>Images (optional)</label>
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+
+        {error && <p className="error">{error}</p>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="title">
+              <FileText size={14} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+              Title
+            </label>
             <input
-              type="file"
-              id="images"
-              accept="image/*"
-              multiple
-              onChange={handleImageChange}
-              style={{ display: 'none' }}
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Give your post a title"
+              className="announcement-input"
             />
-            <button
-              type="button"
-              onClick={() => document.getElementById('images')?.click()}
-              style={{
-                padding: '0.5rem 1rem',
-                background: 'var(--color-primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.9rem'
-              }}
-            >
-              Upload Images
-            </button>
-            <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="content">Content</label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Share your thoughts, tips, or ideas with the crew..."
+              className="announcement-textarea"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="tags">
+              <Tag size={14} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+              Tags (comma-separated)
+            </label>
+            <input
+              type="text"
+              id="tags"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="productivity, workflow, inspiration"
+            />
+          </div>
+
+          {/* Image Upload Section */}
+          <div className="form-group">
+            <label>
+              <Image size={14} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+              Images (optional)
+            </label>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
               <input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="Or paste image URL..."
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem'
-                }}
+                type="file"
+                id="images"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                style={{ display: 'none' }}
               />
               <button
                 type="button"
-                onClick={handleImageUrl}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: 'var(--color-primary)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem'
-                }}
+                onClick={() => document.getElementById('images')?.click()}
+                className="btn btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
               >
-                Add URL
+                <Upload size={16} />
+                Upload Images
               </button>
+              <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  placeholder="Or paste image URL..."
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={handleImageUrl}
+                  className="btn btn-secondary"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                >
+                  <Link size={14} />
+                  Add
+                </button>
+              </div>
             </div>
+
+            {images.length > 0 && (
+              <div className="image-preview-grid">
+                {images.map((img, index) => (
+                  <div key={index} className="image-preview-item">
+                    <img
+                      src={img}
+                      alt={`Preview ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="image-preview-remove"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {images.length > 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem' }}>
-              {images.map((img, index) => (
-                <div key={index} style={{ position: 'relative' }}>
-                  <img
-                    src={img}
-                    alt={`Preview ${index + 1}`}
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      right: '-5px',
-                      background: '#ff4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '20px',
-                      height: '20px',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="form-group">
-          <label htmlFor="videoUrl">YouTube Video URL (optional)</label>
-          <input
-            type="text"
-            id="videoUrl"
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-          {videoUrl && extractYouTubeId(videoUrl) && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                Video will be embedded: <strong>{extractYouTubeId(videoUrl)}</strong>
-              </p>
-            </div>
-          )}
-        </div>
-        <div className="flex-between">
-          <button type="button" onClick={() => navigate('/')} className="btn btn-secondary" disabled={submitting}>
-            Cancel
-          </button>
-          <button type="submit" disabled={submitting}>
-            {submitting ? 'Publishing...' : 'Publish'}
-          </button>
-        </div>
-      </form>
+
+          {/* YouTube Video Section */}
+          <div className="form-group">
+            <label htmlFor="videoUrl">
+              <Youtube size={14} style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />
+              YouTube Video URL (optional)
+            </label>
+            <input
+              type="text"
+              id="videoUrl"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
+            {videoUrl && extractYouTubeId(videoUrl) && (
+              <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-accent)', margin: 0 }}>
+                  ✓ Video will be embedded: <strong>{extractYouTubeId(videoUrl)}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="editor-actions">
+            <button 
+              type="button" 
+              onClick={() => navigate('/')} 
+              className="btn btn-secondary"
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button type="submit" disabled={submitting}>
+              {submitting ? 'Publishing...' : 'Publish Post'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
