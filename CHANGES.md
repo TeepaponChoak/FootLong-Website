@@ -1,114 +1,101 @@
-# FootLong Web - Recent Changes
+# Changes Summary
 
-## Overview
+## User Management Improvements
 
-This document outlines the recent changes made to the FootLong Website project.
+### 1. Fixed Overlapping Issues
+- Changed `.crew-member` layout from `flex` to `grid` with `grid-template-columns: 40px 1fr auto`
+- This prevents content overlap and ensures proper spacing between avatar, info, and actions
+- Updated responsive breakpoints for mobile view
 
-## Changes Made
+### 2. Role Abbreviations
+- Added a comprehensive mapping of role abbreviations (e.g., "Director" → "DIR", "Producer" → "PROD")
+- Role badges now display abbreviated versions to save space
+- Full role name shown on hover via `title` attribute
+- Abbreviations displayed in dropdown menu for clarity
 
-### 1. Title Update
-- Changed "Footlong" to "FootLong Web" in:
-  - `src/components/Navbar.tsx` - Logo text
-  - `src/components/Home.tsx` - Page heading
+### 3. Custom Dropdown Menu
+- Replaced native `<select>` element with a custom dropdown component
+- Dropdown matches the application's dark theme design
+- Features:
+  - Custom styled toggle button with animated arrow
+  - Scrollable menu with max-height
+  - Hover effects on menu items
+  - Shows full role name and abbreviation for each option
+  - Automatically closes after selecting a role
 
-### 2. Admin Authentication System
-- Added `isAdmin` field to User model in:
-  - `src/types.ts` - TypeScript interface
-  - `server/index.js` - MongoDB schema and JWT token generation
+### 4. Delete Role via Click on Badge
+- Removed inline "× Role" delete buttons
+- Role badges are now clickable to remove roles
+- Clickable badges have hover effect (scale + brightness)
+- Added legend item explaining "Click role badge to remove"
 
-- Created admin seeding script:
-  - `server/seedAdmin.js` - Script to create admin user
-  - Default credentials: username: `FootLong`, password: `footlong.29`
+### 5. Delete Confirmation Popup
+- Added confirmation modal before removing a role
+- Modal shows:
+  - Warning icon (AlertTriangle)
+  - Role name to be removed
+  - Cancel and Confirm buttons
+- Prevents accidental role removal
 
-### 3. Announcement System
-- **Backend API** (`server/index.js`):
-  - `GET /api/announcements` - Fetch all announcements
-  - `POST /api/announcements` - Create announcement (admin only)
-  - `PUT /api/announcements/:id` - Update announcement (admin only)
-  - `DELETE /api/announcements/:id` - Delete announcement (admin only)
+## Forgot Password Feature
 
-- **Frontend API** (`src/api.ts`):
-  - Added `announcementAPI` with methods for CRUD operations
+### 1. Login Page Updates
+- Added "Forgot Password?" link below the login button
+- Clicking opens a modal with:
+  - Email input field
+  - Email validation
+  - Loading state with spinner
+  - Success message with checkmark icon
+  - Error handling with descriptive messages
 
-- **Announcement Component** (`src/components/AnnouncementPanel.tsx`):
-  - Displays latest announcement prominently
-  - Shows announcement history
-  - Admin-only editing interface
+### 2. Backend API Endpoints
+- **POST `/api/forgot-password`**: Generates reset token and stores in database
+  - Token expires in 1 hour
+  - Logs reset link to console (for development)
+  - Returns generic success message for security
 
-### 4. Styling
-- Added comprehensive CSS for announcement panel in `src/index.css`:
-  - Announcement card with gradient background
-  - Editor modal for creating/editing
-  - History list styling
-  - Admin action buttons
+- **POST `/api/reset-password/:token`**: Validates token and updates password
+  - Checks token validity and expiration
+  - Requires minimum 6 character password
 
-### 5. Home Page Update
-- Integrated `AnnouncementPanel` component into `src/components/Home.tsx`
+- **GET `/api/verify-reset-token/:token`**: Validates token for the reset page
 
-### 6. Documentation
-- Updated `DEPLOYMENT.md` with:
-  - Admin seeding instructions
-  - Admin credentials documentation
-  - Announcement feature description
+### 3. Reset Password Page
+- New component at `/reset-password/:token`
+- Features:
+  - Token validation on page load
+  - Password visibility toggle
+  - Password confirmation
+  - Loading states
+  - Success message with auto-redirect to login
+  - Invalid/expired token handling
 
-## File Structure
+### 4. User Schema Updates
+- Added `resetPasswordToken` field (String)
+- Added `resetPasswordExpires` field (Date)
 
-```
-src/
-├── components/
-│   ├── AnnouncementPanel.tsx    [NEW]
-│   ├── Home.tsx                 [MODIFIED]
-│   └── Navbar.tsx               [MODIFIED]
-├── api.ts                       [MODIFIED]
-├── types.ts                     [MODIFIED]
-└── index.css                    [MODIFIED]
+## Files Modified
 
-server/
-├── index.js                     [MODIFIED]
-├── seedAdmin.js                 [NEW]
-└── package.json                 [MODIFIED]
+### Frontend
+- `src/components/UserManagement.tsx` - Complete rewrite with new features
+- `src/components/Login.tsx` - Added forgot password modal
+- `src/components/ResetPassword.tsx` - New component for password reset
+- `src/App.tsx` - Added reset password route
+- `src/index.css` - Added styles for custom dropdown, role badges, and responsive fixes
 
-DEPLOYMENT.md                    [MODIFIED]
-```
+### Backend
+- `server/index.js` - Added crypto import, user schema updates, and password reset endpoints
 
-## How to Use
+## Testing Notes
 
-### Setting Up Admin Access
+1. **User Management**:
+   - Test adding roles via dropdown
+   - Test removing roles by clicking badges
+   - Verify confirmation modal appears
+   - Test on mobile viewport for responsive layout
 
-1. Start the server:
-   ```bash
-   cd server
-   npm install
-   npm start
-   ```
-
-2. Run the admin seed script (in a new terminal):
-   ```bash
-   cd server
-   npm run seed:admin
-   ```
-
-3. Log in with admin credentials:
-   - Username: `FootLong`
-   - Password: `footlong.29`
-
-### Creating Announcements
-
-1. Log in as admin
-2. On the homepage, click "New Announcement" button
-3. Fill in title and content
-4. Click "Save"
-
-### Editing Announcements
-
-1. Log in as admin
-2. Find the announcement in the list
-3. Click the edit icon (pencil)
-4. Modify content and save
-
-## Technical Details
-
-- **Authentication**: JWT-based with admin role check
-- **Authorization**: Middleware `requireAdmin` protects announcement endpoints
-- **Database**: MongoDB with Mongoose ODM
-- **Frontend**: React with TypeScript
+2. **Forgot Password**:
+   - Test forgot password flow with valid email
+   - Check console for reset token (development mode)
+   - Test reset password page with valid/invalid tokens
+   - Verify password requirements validation

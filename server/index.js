@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -37,7 +38,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   bio: { type: String, default: "" },
   isAdmin: { type: Boolean, default: false },
-  roles: { type: [String], default: ['Crew Member'] }
+  roles: { type: [String], default: ['Crew Member'] },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 }, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
@@ -302,6 +305,96 @@ app.delete("/api/user", authenticateToken, async (req, res) => {
     await User.findByIdAndDelete(req.user.id);
     await BlogPost.deleteMany({ authorId: req.user.id });
     res.json({ message: "Account deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Forgot Password Route
+app.post("/api/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // For security, don't reveal if email exists or not
+      return res.json({ message: "If the email exists, a reset link has been sent." });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = resetTokenExpiry;
+    await user.save();
+
+    // In a production environment, you would send an email with the reset link.
+    // For now, we'll just return success (the token would be sent via email)
+    // The reset link would be: ${process.env.CLIENT_URL}/reset-password/${resetToken}
+    
+    console.log(`Password reset token for ${email}: ${resetToken}`);
+    console.log(`Reset link would be: ${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`);
+
+    res.json({ message: "If the email exists, a reset link has been sent." });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Reset Password Route (with token)
+app.post("/api/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    // Hash new password and update user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password has been reset successfully" });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Verify Reset Token Route
+app.get("/api/verify-reset-token/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }
+    });
+
+    if (user) {
+      res.json({ valid: true });
+    } else {
+      res.json({ valid: false });
+    }
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

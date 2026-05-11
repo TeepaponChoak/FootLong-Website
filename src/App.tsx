@@ -8,6 +8,7 @@ import { CreatePost } from './components/CreatePost';
 import { PostDetail } from './components/PostDetail';
 import { Profile } from './components/Profile';
 import { NotFound } from './components/NotFound';
+import { ResetPassword } from './components/ResetPassword';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -28,6 +29,7 @@ function AppRoutes() {
         <Route path="/post/:id" element={<PostDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route 
           path="/new" 
           element={
