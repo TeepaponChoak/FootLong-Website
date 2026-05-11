@@ -8,25 +8,131 @@ interface ExtendedUser extends User {
   createdAt: string;
 }
 
-// Role abbreviations mapping
+// Role abbreviations mapping - Comprehensive list for all production roles
 const roleAbbreviations: Record<string, string> = {
+  // Direction & Production
   'Director': 'DIR',
+  'Assistant Director': 'AD',
+  'Second Assistant Director': '2ND AD',
+  'Third Assistant Director': '3RD AD',
   'Producer': 'PROD',
+  'Executive Producer': 'EP',
+  'Line Producer': 'LP',
+  'Associate Producer': 'AP',
+  'Co-Producer': 'CP',
   'Production Manager': 'PM',
-  'Editor': 'EDT',
+  'Production Coordinator': 'PC',
+  'Production Assistant': 'PA',
+  'Unit Production Manager': 'UPM',
+  
+  // Camera Department
+  'Director of Photography': 'DP',
+  'Camera Operator': 'CAM OP',
+  'First Assistant Camera': '1ST AC',
+  'Second Assistant Camera': '2ND AC',
+  'Camera Loader': 'LOADER',
+  'Steadicam Operator': 'STEADI',
+  'Drone Operator': 'DRONE',
+  'Still Photographer': 'STILLS',
+  
+  // Lighting & Electrical
   'Gaffer': 'GAF',
+  'Best Boy Electric': 'BB ELEC',
+  'Lighting Technician': 'LIGHT',
+  'Electrician': 'ELEC',
+  'Rigging Gaffer': 'RIG GAF',
+  'Rigging Electrician': 'RIG ELEC',
+  
+  // Grip Department
+  'Key Grip': 'KEY GRIP',
+  'Best Boy Grip': 'BB GRIP',
+  'Dolly Grip': 'DOLLY',
   'Grip': 'GRIP',
+  'Rigging Grip': 'RIG GRIP',
+  
+  // Sound Department
   'Sound Mixer': 'SND',
-  'Camera Operator': 'CAM',
-  'Script Supervisor': 'SCRIPT',
-  'Production Designer': 'DESIGN',
+  'Boom Operator': 'BOOM',
+  'Sound Utility': 'SND UT',
+  'Playback Operator': 'PLAYBK',
+  
+  // Art Department
+  'Production Designer': 'PD',
+  'Art Director': 'ART DIR',
+  'Set Decorator': 'SET DEC',
+  'Props Master': 'PROPS',
+  'Props Assistant': 'PROP ASST',
+  'Leadman': 'LEAD',
+  'Swing Gang': 'SWING',
+  'Set Dresser': 'DRESS',
+  'Graphic Designer': 'GRAPH',
+  'Storyboard Artist': 'STORY',
+  'Concept Artist': 'CONCEPT',
+  
+  // Costume & Makeup
   'Costume Designer': 'COST',
-  'Makeup Artist': 'MAKEUP',
-  'Stunt Coordinator': 'STUNT',
-  'Visual Effects': 'VFX',
+  'Costume Supervisor': 'COST SV',
+  'Wardrobe Assistant': 'WARD',
+  'Makeup Artist': 'MU',
+  'Hair Stylist': 'HAIR',
+  'Special Effects Makeup Artist': 'SFX MU',
+  'Key Makeup Artist': 'KEY MU',
+  'Key Hair Stylist': 'KEY HAIR',
+  
+  // Editing & Post-Production
+  'Editor': 'EDT',
+  'Assistant Editor': 'ASST EDT',
   'Colorist': 'COLOR',
+  'Post-Production Supervisor': 'POST SV',
+  'Digital Intermediate Editor': 'DI EDT',
+  'Conform Editor': 'CONFORM',
+  
+  // Visual Effects
+  'Visual Effects Supervisor': 'VFX SV',
+  'Visual Effects Producer': 'VFX PROD',
+  'Visual Effects Coordinator': 'VFX CO',
+  'Compositor': 'COMP',
+  'Roto Artist': 'ROTO',
+  'Matchmove Artist': 'MM',
+  'CG Supervisor': 'CG SV',
+  '3D Animator': '3D ANIM',
+  'Texture Artist': 'TEX',
+  'Lighting Artist': 'LGHT ART',
+  
+  // Stunts
+  'Stunt Coordinator': 'STUNT',
+  'Stunt Performer': 'STUNT PF',
+  'Stunt Double': 'STUNT DB',
+  'Fight Choreographer': 'FIGHT',
+  
+  // Casting
   'Casting Director': 'CAST',
+  'Casting Assistant': 'CAST ASST',
+  
+  // Locations
   'Location Manager': 'LOC',
+  'Location Scout': 'SCOUT',
+  'Location Assistant': 'LOC ASST',
+  
+  // Script & Continuity
+  'Script Supervisor': 'SCRIPT',
+  'Script Reader': 'READER',
+  'Script Editor': 'SCRIPT ED',
+  
+  // Transportation
+  'Transportation Coordinator': 'TRANS',
+  'Driver': 'DRV',
+  
+  // Catering & Craft
+  'Caterer': 'CATER',
+  'Craft Service': 'CRAFT',
+  
+  // Safety & Security
+  'Safety Supervisor': 'SAFETY',
+  'Security Guard': 'SEC',
+  'Medic': 'MED',
+  
+  // General
   'Crew Member': 'CREW'
 };
 

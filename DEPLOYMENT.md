@@ -33,7 +33,18 @@ PORT=3000
 MONGODB_URI=your_mongodb_connection_string_here
 JWT_SECRET=your_secure_random_secret_key_here
 CLIENT_URL=https://your-frontend-url.onrender.com
+
+# Email Configuration (for password reset)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password-here
+EMAIL_FROM=noreply@footlongblog.com
+EMAIL_FROM_NAME=FootLong Blog
 ```
+
+> **Note**: See [server/.env.example](./server/.env.example) for detailed email configuration instructions for Gmail, Outlook, and other providers.
 
 ### Install Dependencies
 
@@ -150,6 +161,15 @@ PORT=3000
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/footlong
 JWT_SECRET=your-256-bit-secret-key
 CLIENT_URL=https://your-frontend.vercel.app
+
+# Email Configuration (optional - for password reset)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+EMAIL_FROM=noreply@footlongblog.com
+EMAIL_FROM_NAME=FootLong Blog
 ```
 
 ### Frontend (.env)
@@ -230,9 +250,51 @@ Railway offers a simpler deployment process:
 - Check Render/Railway dashboard for any issues
 - Keep dependencies updated
 
+## Email Configuration for Password Reset
+
+The forgot password feature requires SMTP configuration to send emails. Here's how to set it up:
+
+### Gmail (Recommended for Development)
+
+1. Enable 2-Step Verification on your Google Account
+2. Generate an App Password: https://myaccount.google.com/apppasswords
+3. Use these settings:
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_SECURE=true
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-16-character-app-password
+   ```
+
+### Outlook/Office365
+
+```env
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@outlook.com
+SMTP_PASS=your-password
+```
+
+### Custom SMTP Server
+
+```env
+SMTP_HOST=mail.yourdomain.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@yourdomain.com
+SMTP_PASS=your-password
+```
+
+### Without Email Configuration
+
+If SMTP is not configured, the password reset link will be logged to the server console (development mode only). This is useful for testing without setting up email.
+
 ## Support
 
 For issues, check:
 - [Render Documentation](https://render.com/docs)
 - [MongoDB Atlas Documentation](https://www.mongodb.com/docs/atlas/)
 - [Vercel Documentation](https://vercel.com/docs)
+- [Nodemailer Documentation](https://nodemailer.com/)
