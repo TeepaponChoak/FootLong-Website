@@ -174,7 +174,6 @@ footlong-website/
 
 Admin users have special privileges:
 - Create and manage announcements
-- View user management panel
 - Access admin-only features
 
 The admin account is created using the `seed:admin` script with credentials:

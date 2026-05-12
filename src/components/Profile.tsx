@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { blogAPI, authAPI } from '../api';
 import type { BlogPost } from '../types';
 import { User, Mail, FileText, Trash2, AlertTriangle, ArrowLeft, Edit, Crown, Lock, Eye, EyeOff } from 'lucide-react';
-import { UserManagement } from './UserManagement';
 
 export function Profile() {
   const { user, updateProfile, deleteAccount, logout } = useAuth();
@@ -175,12 +174,6 @@ export function Profile() {
           <span><strong style={{ color: 'var(--color-text-bright)' }}>{userPosts.length}</strong> posts</span>
         </div>
       </div>
-
-      {user.isAdmin && (
-        <div style={{ marginBottom: '2rem' }}>
-          <UserManagement />
-        </div>
-      )}
 
       {isOwnProfile && (
         <>
